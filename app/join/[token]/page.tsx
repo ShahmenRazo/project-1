@@ -12,7 +12,6 @@ import {
 import { JoinGroupButton } from "@/components/groups/join-group-button";
 import { getPublicInviteInfo } from "@/lib/public-invites";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { formatMoney } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -48,22 +47,6 @@ export default async function JoinPage({
   params: { token: string };
 }) {
   const info = await getPublicInviteInfo(params.token).catch(() => null);
-
-  let debugDump: string | null = null;
-  if (info?.valid) {
-    const admin = createAdminClient();
-    const { data: rows } = await admin
-      .from("group_members")
-      .select("user_id, share_percent")
-      .eq("group_id", info.group_id);
-    debugDump = JSON.stringify({
-      token: params.token,
-      share_percent: info.share_percent,
-      share_monthly: info.share_monthly,
-      rows: rows ?? null,
-      member_count: info.member_count,
-    });
-  }
 
   // Пользователь уже залогинен?
   const supabase = createClient();
@@ -145,11 +128,6 @@ export default async function JoinPage({
                   <span className="font-semibold tabular-nums">
                     {info.share_percent}%
                   </span>
-                  {debugDump && (
-                    <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-[10px] text-muted-foreground">
-                      DEBUG {debugDump}
-                    </pre>
-                  )}
                 </div>
 
                 <div className="flex items-center justify-between rounded-lg bg-muted/60 px-4 py-3">

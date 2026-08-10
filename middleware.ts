@@ -65,6 +65,10 @@ export async function middleware(request: NextRequest) {
           );
         },
       },
+      global: {
+        fetch: (input, init) =>
+          fetch(input, { ...init, cache: "no-store" }),
+      },
     }
   );
 

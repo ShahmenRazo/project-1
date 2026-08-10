@@ -115,19 +115,6 @@ export async function getPublicInviteInfo(
   );
   const remaining = roundMoney(100 - used);
 
-  console.error(
-    "[public-invites] DEBUG",
-    JSON.stringify({
-      url: process.env.SUPABASE_INTERNAL_URL,
-      publicUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      token,
-      group_id: group.id,
-      memberRows,
-      used,
-      remaining,
-    })
-  );
-
   base.member_count = memberCount ?? 0;
   base.share_percent = Math.max(0, remaining);
   if (sub) {
