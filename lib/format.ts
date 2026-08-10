@@ -25,7 +25,15 @@ export function formatDateTime(iso: string): string {
   });
 }
 
-/** Инициалы для Avatar: "Иван Петров" -> "ИП" */
+/** Ordinal day: 1 -> "1st", 3 -> "3rd", 15 -> "15th" */
+export function ordinal(n: number): string {
+  const suffixes = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  const suffix = v >= 11 && v <= 13 ? "th" : suffixes[Math.min(v % 10, 4)];
+  return `${n}${suffix}`;
+}
+
+/** Initials for Avatar: "Ivan Petrov" -> "IP" */
 export function initials(name: string): string {
   return name
     .split(/\s+/)

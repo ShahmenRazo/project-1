@@ -197,7 +197,7 @@ export function GroupView({
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Share {m.share_percent}% ·{" "}
-                      {m.payment_status === "paid" ? "all paid" : "owes"}
+                      {m.payment_status === "paid" ? "all paid" : "has debt"}
                     </p>
                   </div>
 
@@ -205,7 +205,7 @@ export function GroupView({
                     variant={owes > 0 ? "destructive" : "secondary"}
                     className="tabular-nums"
                   >
-                    {owes > 0 ? `owes ${formatMoney(owes, currency)}` : "settled"}
+                    {owes > 0 ? `Owes ${formatMoney(owes, currency)}` : "Paid"}
                   </Badge>
                 </div>
               );

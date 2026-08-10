@@ -94,7 +94,7 @@ export function GroupsSection({
                     <p className="flex items-center justify-between gap-2">
                       <span className="flex items-center gap-1.5 text-muted-foreground">
                         <TrendingDown className="h-4 w-4 text-emerald-600" />
-                        Owed to you
+                        You are owed
                       </span>
                       <span className="font-semibold tabular-nums text-emerald-600">
                         {formatMoney(roundMoney(g.owed_to_me), g.currency)}

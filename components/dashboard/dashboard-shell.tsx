@@ -23,7 +23,7 @@ import { UpsellModal } from "@/components/billing/upsell-modal";
 import { onForegroundMessage } from "@/lib/push/client";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { LIMITS } from "@/lib/billing/plans";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, ordinal } from "@/lib/format";
 import { roundMoney } from "@/lib/utils";
 import type {
   DashboardProfile,
@@ -150,7 +150,7 @@ export function DashboardShell({
                     <span className="truncate">
                       {s.name}{" "}
                       <span className="text-muted-foreground">
-                        · day {s.billing_day}
+                        · {ordinal(s.billing_day)}
                       </span>
                     </span>
                     <span className="tabular-nums">
@@ -219,7 +219,7 @@ export function DashboardShell({
                     {sub.billing_cycle === "monthly"
                       ? "Monthly"
                       : "Yearly"}
-                    , billed on day {sub.billing_day}
+                    , billed on the {ordinal(sub.billing_day)}
                   </div>
 
                   {hasGroup && (
