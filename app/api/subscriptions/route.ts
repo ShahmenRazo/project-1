@@ -62,7 +62,15 @@ export async function GET() {
 
     if (error) throw error;
 
-    return ok(subscriptions);
+    // PostgREST возвращает связь как `groups`, а клиент ждёт `group`
+    const normalized = (subscriptions ?? []).map((s) => {
+      const { groups, ...rest } = s as {
+        groups: { id: string; name: string; creator_id: string } | null;
+      };
+      return { ...rest, group: groups };
+    });
+
+    return ok(normalized);
   } catch (error) {
     return fail(error);
   }
