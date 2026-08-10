@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { ApiError, fail, ok, parseBody } from "@/lib/api";
+import { fail, ok, parseBody } from "@/lib/api";
 
 const resetSchema = z.object({
   email: z.string().email(),
@@ -9,9 +9,9 @@ const resetSchema = z.object({
 
 /**
  * POST /api/auth/reset-password — запрос сброса пароля.
- * Отправляет письмо со ссылкой /reset-password?token=...
- * Всегда отвечает успехом, чтобы не раскрывать существование email
- * (защита от перечисления пользователей).
+ * Отправляет письмо со ссылкой /reset-password?token_hash=...
+ * Всегда отвечает успехом (202), чтобы не раскрывать существование email
+ * (защита от перечисления пользователей). Ошибки пишутся только в лог.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +26,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      throw new ApiError(400, error.message, "RESET_SEND_FAILED");
+      // Письмо не ушло (например, SMTP не настроен) — логируем,
+      // но клиенту отвечаем нейтрально
+      console.error("[auth] resetPasswordForEmail failed:", error.message);
     }
 
     return ok({ sent: true }, { status: 202 });
