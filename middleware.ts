@@ -1,8 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
- * Защита роутов + обновление сессии Supabase:
+ * Защита роутов + rate limiting + обновление сессии Supabase:
+ * - Rate limiting: /api/* — 30 req/min с одного IP, /api/auth/* — 10 req/min,
+ *   /api/billing/webhook — без лимита (LemonSqueezy). 429 + Retry-After.
  * - /dashboard/*, /groups/*, /profile/* — только для авторизованных (иначе /login)
  * - /api/* — только для авторизованных (иначе 401 JSON);
  *   исключения: /api/billing/webhook (LemonSqueezy), /api/cron/* (Bearer CRON_SECRET),
@@ -11,6 +14,34 @@ import { createServerClient } from "@supabase/ssr";
  * - публичные: / (landing), /pricing, /auth/callback, /invite/[token]
  */
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // ---------- Rate limiting (только /api/*) ----------
+  if (pathname.startsWith("/api/")) {
+    const ip =
+      request.headers.get("cf-connecting-ip") ??
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      "unknown";
+
+    const { limited, retryAfter } = await checkRateLimit(pathname, ip);
+
+    if (limited) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "Too many requests, slow down",
+            code: "RATE_LIMITED",
+          },
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(retryAfter) },
+        }
+      );
+    }
+  }
+
+  // ---------- Авторизация ----------
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -39,8 +70,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
 
   const isApi = pathname.startsWith("/api/");
   const isProtectedApi =

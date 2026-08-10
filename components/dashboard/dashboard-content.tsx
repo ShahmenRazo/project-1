@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { GroupsSection } from "@/components/dashboard/groups-section";
+import {
+  DashboardSkeleton,
+  GroupListSkeleton,
+} from "@/components/ui/skeleton";
 import type { DashboardGroup, DashboardSubscription } from "@/lib/types";
 
 export function DashboardContent({
@@ -65,24 +69,7 @@ export function DashboardContent({
   return (
     <div className="space-y-10">
       {loadingSubs ? (
-        <div className="space-y-6">
-          <div className="flex items-end justify-between gap-4">
-            <div className="space-y-2">
-              <div className="h-7 w-52 animate-pulse rounded bg-muted" />
-              <div className="h-4 w-72 animate-pulse rounded bg-muted" />
-            </div>
-            <div className="h-9 w-40 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="h-28 animate-pulse rounded-xl bg-muted" />
-            <div className="h-28 animate-pulse rounded-xl bg-muted" />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-44 animate-pulse rounded-xl bg-muted" />
-            ))}
-          </div>
-        </div>
+        <DashboardSkeleton />
       ) : (
         <DashboardShell
           subscriptions={subscriptions}
@@ -97,12 +84,13 @@ export function DashboardContent({
 
       {loadingGroups ? (
         <div className="space-y-4">
-          <div className="h-6 w-40 animate-pulse rounded bg-muted" />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-44 animate-pulse rounded-xl bg-muted" />
-            ))}
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-2">
+              <div className="h-6 w-40 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-56 animate-pulse rounded bg-muted" />
+            </div>
           </div>
+          <GroupListSkeleton />
         </div>
       ) : (
         <GroupsSection groups={groups} />

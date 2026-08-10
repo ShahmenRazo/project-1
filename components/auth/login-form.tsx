@@ -147,6 +147,17 @@ export function LoginForm() {
         />
       </div>
 
+      {mode === "login" && (
+        <div className="text-right">
+          <a
+            href="/reset-password"
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            Забыли пароль?
+          </a>
+        </div>
+      )}
+
       <Button type="submit" disabled={loading} className="mt-2 w-full">
         {loading
           ? "Подождите…"

@@ -199,6 +199,21 @@ create trigger trg_push_subscriptions_updated_at
   before update on public.push_subscriptions
   for each row execute function public.set_updated_at();
 
+-- ---------------------------------------------------------------------------
+-- 8. error_reports — отчёты об ошибках с клиента (/api/report-error)
+-- ---------------------------------------------------------------------------
+create table public.error_reports (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid null references public.users (id) on delete set null,
+  message    text null,
+  stack      text null,
+  path       text null,
+  created_at timestamptz not null default now()
+);
+
+create index idx_error_reports_created_at
+  on public.error_reports (created_at desc);
+
 -- ============================================================================
 -- ROW LEVEL SECURITY
 -- ============================================================================
@@ -415,6 +430,9 @@ left join (
   where status = 'pending'
   group by group_id, to_user_id
 ) pd on pd.group_id = g.id and pd.to_user_id = gm.user_id;
+
+-- ---------------- error_reports ----------------
+alter table public.error_reports enable row level security;
 
 -- ============================================================================
 -- Примечание: для свежей базы этот скрипт создаёт всё, включая

@@ -5,7 +5,7 @@ import { AlertCircle, Bell, CheckCircle2, Mail, Megaphone, UserPlus } from "luci
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import { NotificationListSkeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,11 +94,7 @@ export function NotificationBell() {
 
         <div className="max-h-96 overflow-y-auto">
           {loading ? (
-            <div className="space-y-3 p-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
+            <NotificationListSkeleton />
           ) : notifications.length === 0 ? (
             <p className="p-4 text-center text-sm text-muted-foreground">
               Пока нет уведомлений
