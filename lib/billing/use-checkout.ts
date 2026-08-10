@@ -7,10 +7,12 @@ import { toast } from "sonner";
 export function useCheckout() {
   const [loading, setLoading] = useState(false);
 
-  async function startCheckout(): Promise<void> {
+  async function startCheckout(period: "monthly" | "yearly" = "monthly"): Promise<void> {
     setLoading(true);
     try {
-      const res = await fetch("/api/billing/checkout", { method: "POST" });
+      const res = await fetch(`/api/billing/checkout?period=${period}`, {
+        method: "POST",
+      });
       const json = (await res.json().catch(() => null)) as {
         error?: { message?: string };
         data?: { checkout_url?: string };

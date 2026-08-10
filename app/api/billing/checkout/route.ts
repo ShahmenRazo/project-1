@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ApiError, fail, ok, requireUser } from "@/lib/api";
 import { createProCheckout } from "@/lib/billing/lemon";
 
-// POST /api/billing/checkout — создать checkout LemonSqueezy на план Pro
+// POST /api/billing/checkout?period=monthly|yearly — создать checkout LemonSqueezy
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
@@ -17,9 +17,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const period = request.nextUrl.searchParams.get("period");
     const checkoutUrl = await createProCheckout({
       userId: user.id,
       email: user.email,
+      period: period === "yearly" ? "yearly" : "monthly",
     });
 
     return ok({ checkout_url: checkoutUrl });

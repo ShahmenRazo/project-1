@@ -3,7 +3,6 @@ import {
   ArrowDown,
   ArrowRight,
   BellRing,
-  Check,
   CreditCard,
   Handshake,
   ShieldCheck,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SavingsCalculator } from "@/components/landing/savings-calculator";
+import { TrustBadges } from "@/components/trust/TrustBadges";
 
 export const dynamic = "force-dynamic";
 
@@ -31,11 +31,6 @@ const COPY = {
       "Netflix, Spotify, ChatGPT, Xbox Game Pass — share the cost automatically. No awkward texts, no forgotten payments.",
     ctaPrimary: "Get Started Free",
     ctaSecondary: "See how much you'll save",
-    trust: [
-      "No credit card required",
-      "Free for 3 subscriptions",
-      "Setup in 2 minutes",
-    ],
   },
   howItWorks: {
     title: "How It Works",
@@ -73,13 +68,6 @@ const COPY = {
     title: "Stop paying for everyone. Split it fairly.",
     text: "Create your first group in two minutes — free, no card required.",
     button: "Start Splitting Free",
-  },
-  footer: {
-    howItWorks: "How It Works",
-    pricing: "Pricing",
-    signIn: "Sign In",
-    privacy: "Privacy Policy",
-    terms: "Terms",
   },
 } as const;
 
@@ -148,15 +136,8 @@ export default function LandingPage() {
             </Button>
           </div>
 
-          {/* Trust bar */}
-          <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            {COPY.hero.trust.map((item) => (
-              <li key={item} className="flex items-center gap-1.5">
-                <Check className="h-4 w-4 shrink-0 text-emerald-600" />
-                {item}
-              </li>
-            ))}
-          </ul>
+          {/* Trust badges */}
+          <TrustBadges />
         </div>
       </section>
 
@@ -235,34 +216,6 @@ export default function LandingPage() {
           </Button>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row">
-          <div className="flex items-center gap-2 font-medium text-foreground">
-            <ShieldCheck className="h-4 w-4" />
-            {COPY.brand}
-          </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6">
-            <Link href="#how-it-works" className="hover:text-foreground">
-              {COPY.footer.howItWorks}
-            </Link>
-            <Link href="/pricing" className="hover:text-foreground">
-              {COPY.footer.pricing}
-            </Link>
-            <Link href="/privacy" className="hover:text-foreground">
-              {COPY.footer.privacy}
-            </Link>
-            <Link href="/terms" className="hover:text-foreground">
-              {COPY.footer.terms}
-            </Link>
-            <Link href="/login" className="hover:text-foreground">
-              {COPY.footer.signIn}
-            </Link>
-          </nav>
-          <p>© {new Date().getFullYear()} {COPY.brand}</p>
-        </div>
-      </footer>
     </div>
   );
 }

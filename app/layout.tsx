@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://kitstartai.com";
@@ -67,6 +68,7 @@ export default function RootLayout({
     <html lang="ru">
       <body>
         {children}
+        <Footer />
         <CookieBanner />
         <Toaster richColors closeButton position="top-center" />
       </body>

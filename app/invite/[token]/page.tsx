@@ -57,7 +57,6 @@ export default async function InvitePage({
             </CardContent>
           </Card>
         </main>
-        <PublicFooter />
       </div>
     );
   }
@@ -179,8 +178,6 @@ export default async function InvitePage({
           </CardContent>
         </Card>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }
@@ -198,18 +195,5 @@ function PublicHeader() {
         </Button>
       </div>
     </header>
-  );
-}
-
-function PublicFooter() {
-  return (
-    <footer className="border-t">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-6 text-sm text-muted-foreground">
-        <span>SubSplit — делите подписки честно</span>
-        <Link href="/" className="hover:text-foreground">
-          На главную
-        </Link>
-      </div>
-    </footer>
   );
 }

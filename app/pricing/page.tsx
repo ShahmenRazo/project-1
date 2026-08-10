@@ -44,10 +44,10 @@ export default async function PricingPageRoute({
             SubSplit
           </Link>
           <Link
-            href="/"
+            href="/login"
             className="text-sm text-muted-foreground hover:underline"
           >
-            ← На дашборд
+            Sign In
           </Link>
         </div>
       </header>
@@ -56,6 +56,7 @@ export default async function PricingPageRoute({
         currentTier={tier}
         portalUrl={portalUrl}
         upgradeStatus={searchParams.status}
+        authenticated={!!user}
       />
     </div>
   );

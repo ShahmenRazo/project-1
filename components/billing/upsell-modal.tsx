@@ -57,7 +57,11 @@ export function UpsellModal({
         </ul>
 
         <div className="flex flex-col gap-2">
-          <Button onClick={startCheckout} disabled={loading} className="w-full">
+          <Button
+            onClick={() => startCheckout()}
+            disabled={loading}
+            className="w-full"
+          >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Перейти на Pro —{" "}
             {formatMoney(PRO_PLAN.price, PRO_PLAN.currency)}/мес

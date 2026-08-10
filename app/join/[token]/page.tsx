@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Link2, ShieldCheck, Users } from "lucide-react";
+import { ShieldCheck, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -164,18 +164,6 @@ export default async function JoinPage({
           )}
         </Card>
       </main>
-
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-6 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Link2 className="h-4 w-4" />
-            SubSplit — делите подписки честно
-          </span>
-          <Link href="/" className="hover:text-foreground">
-            На главную
-          </Link>
-        </div>
-      </footer>
     </div>
   );
 }

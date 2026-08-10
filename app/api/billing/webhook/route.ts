@@ -46,7 +46,9 @@ export async function POST(request: NextRequest) {
     data?.relationships?.variant?.data?.id ?? attributes.variant_id;
   const isProVariant =
     variantId != null &&
-    String(variantId) === (process.env.LEMONSQUEEZY_PRO_VARIANT_ID ?? "");
+    (String(variantId) === (process.env.LEMONSQUEEZY_PRO_VARIANT_ID ?? "") ||
+      String(variantId) ===
+        (process.env.LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID ?? ""));
 
   // expires_at: активная -> renews_at (след. продление),
   // отменённая -> ends_at (конец оплаченного периода)

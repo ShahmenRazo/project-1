@@ -47,10 +47,14 @@ const ACTIVE_STATUSES = new Set(["active", "on_trial", "past_due"]);
 export async function createProCheckout(input: {
   userId: string;
   email: string;
+  period?: "monthly" | "yearly";
 }): Promise<string> {
   const apiKey = process.env.LEMONSQUEEZY_API_KEY;
   const storeId = process.env.LEMONSQUEEZY_STORE_ID;
-  const variantId = process.env.LEMONSQUEEZY_PRO_VARIANT_ID;
+  const variantId =
+    input.period === "yearly"
+      ? process.env.LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID
+      : process.env.LEMONSQUEEZY_PRO_VARIANT_ID;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   if (!apiKey || !storeId || !variantId) {
