@@ -41,6 +41,9 @@ export interface Database {
           ls_subscription_item_id: string | null;
           plan_status: string;
           plan_expires_at: string | null;
+          role: "user" | "admin";
+          last_active: string | null;
+          country: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -55,6 +58,9 @@ export interface Database {
           ls_subscription_item_id?: string | null;
           plan_status?: string;
           plan_expires_at?: string | null;
+          role?: "user" | "admin";
+          last_active?: string | null;
+          country?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -69,6 +75,9 @@ export interface Database {
           ls_subscription_item_id?: string | null;
           plan_status?: string;
           plan_expires_at?: string | null;
+          role?: "user" | "admin";
+          last_active?: string | null;
+          country?: string | null;
           created_at?: string;
           updated_at?: string;
         };

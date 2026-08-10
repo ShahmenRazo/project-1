@@ -507,6 +507,26 @@ create policy "public_invites_delete_creator" on public.public_invites
   for delete using (public.is_group_creator(group_id));
 
 -- ============================================================================
+-- 10. Admin panel — role, last_active, country (миграция 009)
+-- ============================================================================
+alter table public.users
+  add column if not exists role text not null default 'user'
+    check (role in ('user', 'admin'));
+
+alter table public.users
+  add column if not exists last_active timestamptz;
+
+alter table public.users
+  add column if not exists country text;
+
+create index if not exists idx_users_role        on public.users (role);
+create index if not exists idx_users_last_active on public.users (last_active);
+create index if not exists idx_users_created_at  on public.users (created_at);
+
+update public.users set role = 'admin' where email = 'admin@kitstartai.com';
+
+
+-- ============================================================================
 -- Примечание: для свежей базы этот скрипт создаёт всё, включая
 -- push_subscriptions и soft-delete (subscriptions.deleted_at).
 -- Для уже существующей БД применяйте миграции из supabase/migrations/ по порядку.

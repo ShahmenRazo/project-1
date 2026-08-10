@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CreditCard,
   Gem,
@@ -50,6 +50,16 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
+
+  // Heartbeat: обновляем last_active при открытии приложения и каждые 5 минут
+  useEffect(() => {
+    const beat = () => {
+      void fetch("/api/heartbeat", { method: "POST" }).catch(() => {});
+    };
+    beat();
+    const timer = setInterval(beat, 5 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSignOut = async () => {
     if (signingOut) return;

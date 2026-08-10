@@ -90,7 +90,8 @@ export async function middleware(request: NextRequest) {
   const isProtectedPage =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/groups") ||
-    pathname.startsWith("/profile");
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/admin");
 
   if (user) {
     if (pathname === "/login") {
