@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   ApiError,
@@ -14,6 +14,88 @@ import { notifyUser } from "@/lib/notifications";
 import { getUserLimits } from "@/lib/billing/tier";
 import { formatMoney } from "@/lib/format";
 import { nextBillingDate, roundMoney, shareAmount } from "@/lib/utils";
+
+// GET /api/groups — мои группы с моей долей и суммами долгов
+export async function GET() {
+  try {
+    const supabase = createClient();
+    const user = await requireUser(supabase);
+
+    const { data: memberships, error: membershipsError } = await supabase
+      .from("group_members")
+      .select(
+        "group_id, share_percent, groups(id, name, creator_id, subscription_id, subscriptions(name))"
+      )
+      .eq("user_id", user.id)
+      .order("group_id", { ascending: false });
+
+    if (membershipsError) throw membershipsError;
+
+    const groups = (memberships ?? []).filter((m) => m.groups);
+    if (groups.length === 0) return ok({ groups: [] });
+
+    const groupIds = groups.map((m) => m.group_id);
+    const groupById = new Map(
+      groups.map((m) => [m.group_id, m.groups as Record<string, unknown>])
+    );
+
+    const [{ data: members }, { data: payments }] = await Promise.all([
+      supabase
+        .from("group_members")
+        .select("group_id, user_id")
+        .in("group_id", groupIds),
+      supabase
+        .from("payments")
+        .select("group_id, from_user_id, to_user_id, amount, currency")
+        .in("group_id", groupIds)
+        .eq("status", "pending"),
+    ]);
+
+    const memberCount = new Map<string, number>();
+    for (const m of members ?? []) {
+      memberCount.set(m.group_id, (memberCount.get(m.group_id) ?? 0) + 1);
+    }
+
+    const owedByMe = new Map<string, number>();
+    const owedToMe = new Map<string, number>();
+    const currencies = new Map<string, string>();
+    for (const p of payments ?? []) {
+      if (p.from_user_id === user.id) {
+        owedByMe.set(p.group_id, (owedByMe.get(p.group_id) ?? 0) + p.amount);
+        currencies.set(p.group_id, p.currency);
+      } else if (p.to_user_id === user.id) {
+        owedToMe.set(p.group_id, (owedToMe.get(p.group_id) ?? 0) + p.amount);
+        currencies.set(p.group_id, p.currency);
+      }
+    }
+
+    const result = groups.map((m) => {
+      const g = m.groups as {
+        id: string;
+        name: string;
+        creator_id: string;
+        subscription_id: string;
+        subscriptions: { name: string } | null;
+      };
+      return {
+        id: g.id,
+        name: g.name,
+        creator_id: g.creator_id,
+        subscription_id: g.subscription_id,
+        subscription_name: g.subscriptions?.name ?? null,
+        my_share_percent: m.share_percent,
+        member_count: memberCount.get(g.id) ?? 0,
+        owed_by_me: owedByMe.get(g.id) ?? 0,
+        owed_to_me: owedToMe.get(g.id) ?? 0,
+        currency: currencies.get(g.id) ?? "USD",
+      };
+    });
+
+    return NextResponse.json({ data: { groups: result } });
+  } catch (error) {
+    return fail(error);
+  }
+}
 
 // POST /api/groups — создать группу для деления подписки
 // Тело: { name, subscription_id, members?: [{ user_id | email, share_percent }] }

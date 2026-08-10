@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import { CreditCard, UserX } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, CreditCard, UserX } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -39,6 +42,7 @@ export interface GroupViewProps {
   groupId: string;
   groupName: string;
   isCreator: boolean;
+  currentUserId: string;
   subscription: {
     name: string;
     price: number;
@@ -54,10 +58,14 @@ export function GroupView({
   groupId,
   groupName,
   isCreator,
+  currentUserId,
   subscription,
   members,
   payments,
 }: GroupViewProps) {
+  const router = useRouter();
+  const [payingIds, setPayingIds] = useState<Set<string>>(new Set());
+
   const totalMonthly = useMemo(() => {
     if (!subscription) return 0;
     return roundMoney(
@@ -74,6 +82,41 @@ export function GroupView({
     }
     return map;
   }, [payments]);
+
+  const myDebts = useMemo(
+    () => payments.filter((p) => p.from_user_id === currentUserId),
+    [payments, currentUserId]
+  );
+
+  const markPaid = async (paymentId: string) => {
+    setPayingIds((prev) => new Set(prev).add(paymentId));
+    try {
+      const res = await fetch(`/api/payments/${paymentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "paid" }),
+      });
+      const json = (await res.json().catch(() => null)) as {
+        error?: { message?: string };
+      } | null;
+
+      if (!res.ok) {
+        toast.error(json?.error?.message ?? "Не удалось отметить оплату");
+        return;
+      }
+
+      toast.success("Долг оплачен");
+      router.refresh();
+    } catch {
+      toast.error("Ошибка сети, попробуйте ещё раз");
+    } finally {
+      setPayingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(paymentId);
+        return next;
+      });
+    }
+  };
 
   const currency = subscription?.currency ?? payments[0]?.currency ?? "USD";
   const anyDebts = payments.length > 0;
@@ -150,6 +193,43 @@ export function GroupView({
           )}
         </CardContent>
       </Card>
+
+      {myDebts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Ваши долги</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {myDebts.map((p) => {
+              const paying = payingIds.has(p.id);
+              return (
+                <div
+                  key={p.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"
+                >
+                  <div className="min-w-0 text-sm">
+                    <p className="font-medium">
+                      {formatMoney(p.amount, p.currency)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Долг за {subscription?.name ?? "подписку"} · до{" "}
+                      {new Date(p.due_date).toLocaleDateString("ru-RU")}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => markPaid(p.id)}
+                    disabled={paying}
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    {paying ? "Сохраняем…" : "Отметить оплаченным"}
+                  </Button>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {anyDebts ? (
         <BalanceCalculator members={members} payments={payments} />

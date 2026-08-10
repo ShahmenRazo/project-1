@@ -1,12 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { AppShell } from "@/components/layout/app-shell";
 import { GroupView } from "@/components/groups/group-view";
 import type {
   GroupViewMember,
   GroupViewPayment,
 } from "@/components/groups/group-view";
-import { formatMoney } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +21,12 @@ export default async function GroupPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("id, display_name, email, subscription_tier")
+    .eq("id", user.id)
+    .single();
 
   const { data: group } = await supabase
     .from("groups")
@@ -97,25 +103,19 @@ export default async function GroupPage({
   }));
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-4">
-          <a href="/" className="text-sm font-semibold hover:underline">
-            ← Дашборд
-          </a>
-          <span className="text-sm text-muted-foreground">
-            {subscription
-              ? ` · ${subscription.name} · ${formatMoney(subscription.price, subscription.currency)}`
-              : ""}
-          </span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-3xl px-4 py-8">
+    <AppShell
+      user={{
+        display_name: profile?.display_name ?? null,
+        email: profile?.email ?? user.email ?? "",
+        subscription_tier: profile?.subscription_tier ?? "free",
+      }}
+    >
+      <div className="mx-auto max-w-3xl">
         <GroupView
           groupId={group.id}
           groupName={group.name}
           isCreator={isCreator}
+          currentUserId={user.id}
           subscription={
             subscription
               ? {
@@ -130,7 +130,7 @@ export default async function GroupPage({
           members={members}
           payments={payments}
         />
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

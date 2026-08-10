@@ -28,7 +28,7 @@ import { roundMoney } from "@/lib/utils";
 import type {
   DashboardProfile,
   DashboardSubscription,
-} from "@/app/page";
+} from "@/lib/types";
 
 /** Месячная стоимость подписки (yearly делится на 12) */
 function monthlyPrice(sub: DashboardSubscription): number {
