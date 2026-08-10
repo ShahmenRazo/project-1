@@ -215,7 +215,24 @@ create index idx_error_reports_created_at
   on public.error_reports (created_at desc);
 
 -- ---------------------------------------------------------------------------
--- 9. referrals — реферальная система (кто кого пригласил)
+-- 9. waitlist — email-заявки с лендинга
+-- ---------------------------------------------------------------------------
+create table public.waitlist (
+  id         uuid primary key default gen_random_uuid(),
+  email      text not null unique,
+  source     text not null default 'landing',
+  created_at timestamptz not null default now()
+);
+
+alter table public.waitlist enable row level security;
+
+-- insert — публично (форма на лендинге), select — только service role (admin)
+create policy "waitlist_insert_public" on public.waitlist
+  for insert to anon, authenticated
+  with check (true);
+
+-- ---------------------------------------------------------------------------
+-- 10. referrals — реферальная система (кто кого пригласил)
 -- ---------------------------------------------------------------------------
 create table public.referrals (
   id           uuid primary key default gen_random_uuid(),

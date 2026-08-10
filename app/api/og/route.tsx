@@ -1,17 +1,20 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "@vercel/og";
-import { readFileSync } from "fs";
-import { join } from "path";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { roundMoney, shareAmount } from "@/lib/utils";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+// Edge Runtime: шрифты подгружаются как ассеты (readFileSync на edge недоступен)
+export const runtime = "edge";
 
-const FONT_DIR = join(process.cwd(), "lib/og/fonts");
-const inter400 = readFileSync(join(FONT_DIR, "inter-400.ttf"));
-const inter700 = readFileSync(join(FONT_DIR, "inter-700.ttf"));
-const inter900 = readFileSync(join(FONT_DIR, "inter-900.ttf"));
+const inter400 = fetch(
+  new URL("../../../lib/og/fonts/inter-400.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+const inter700 = fetch(
+  new URL("../../../lib/og/fonts/inter-700.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+const inter900 = fetch(
+  new URL("../../../lib/og/fonts/inter-900.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
 
 const EMERALD = "#34d399";
 const WHITE = "#fafafa";
@@ -74,33 +77,81 @@ async function loadGroupData(groupId: string): Promise<OgData | null> {
   };
 }
 
-function fallbackData(): OgData {
-  return {
-    group_name: "SubSplit",
-    subscription_name: null,
-    share_monthly: 0,
-    currency: "USD",
-    member_count: 0,
-  };
+function BrandCard({ title, fonts }: { title: string; fonts: { name: string; data: ArrayBuffer; weight: 400 | 700 | 900 }[] }) {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background:
+            "linear-gradient(180deg, #18181b 0%, #27272a 100%)",
+          color: WHITE,
+          fontFamily: "Inter",
+          position: "relative",
+        }}
+      >
+        {/* круг с $ */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 96,
+            height: 96,
+            borderRadius: 999,
+            background: EMERALD,
+            color: "#09090b",
+            fontSize: 56,
+            fontWeight: 900,
+          }}
+        >
+          $
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            fontSize: 96,
+            fontWeight: 900,
+            lineHeight: 1.1,
+            marginTop: 36,
+            color: WHITE,
+          }}
+        >
+          {title}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            fontSize: 40,
+            color: MUTED,
+            marginTop: 16,
+          }}
+        >
+          Split subscriptions, not friendships
+        </div>
+      </div>
+    ),
+    {
+      width: 1200,
+      height: 630,
+      fonts,
+    }
+  );
 }
 
-/**
- * GET /api/og?group=[id] — динамическая OG-картинка 1200x630 для шеринга
- * группы в соцсетях. Публичный (используется мета-тегами страниц).
- */
-export async function GET(request: NextRequest) {
-  const groupId = request.nextUrl.searchParams.get("group") ?? "";
-  const data =
-    groupId.length === 36
-      ? (await loadGroupData(groupId).catch(() => null))
-      : null;
-
-  const info = data ?? fallbackData();
+function GroupCard({ data, fonts }: { data: OgData; fonts: { name: string; data: ArrayBuffer; weight: 400 | 700 | 900 }[] }) {
   const priceLabel =
-    info.share_monthly > 0
-      ? `${info.share_monthly.toLocaleString("en-US", {
+    data.share_monthly > 0
+      ? `${data.share_monthly.toLocaleString("en-US", {
           style: "currency",
-          currency: info.currency,
+          currency: data.currency,
         })}/mo`
       : null;
 
@@ -120,7 +171,6 @@ export async function GET(request: NextRequest) {
           position: "relative",
         }}
       >
-        {/* фоновый градиент */}
         <div
           style={{
             position: "absolute",
@@ -130,7 +180,6 @@ export async function GET(request: NextRequest) {
           }}
         />
 
-        {/* логотип */}
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
             <path
@@ -150,7 +199,6 @@ export async function GET(request: NextRequest) {
           </span>
         </div>
 
-        {/* заголовок */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
@@ -162,32 +210,29 @@ export async function GET(request: NextRequest) {
               color: WHITE,
             }}
           >
-            {data ? `Join ${info.group_name}` : "Split subscriptions, not friendships"}
+            Join {data.group_name}
           </div>
 
-          {data && (
-            <div style={{ display: "flex", alignItems: "center", gap: 24, fontSize: 34 }}>
-              <span style={{ color: MUTED }}>
-                {info.subscription_name ?? "Shared subscription"}
+          <div style={{ display: "flex", alignItems: "center", gap: 24, fontSize: 34 }}>
+            <span style={{ color: MUTED }}>
+              {data.subscription_name ?? "Shared subscription"}
+            </span>
+            {priceLabel && (
+              <span
+                style={{
+                  color: EMERALD,
+                  fontWeight: 700,
+                  background: "rgba(52,211,153,0.14)",
+                  borderRadius: 999,
+                  padding: "10px 28px",
+                }}
+              >
+                {priceLabel}
               </span>
-              {priceLabel && (
-                <span
-                  style={{
-                    color: EMERALD,
-                    fontWeight: 700,
-                    background: "rgba(52,211,153,0.14)",
-                    borderRadius: 999,
-                    padding: "10px 28px",
-                  }}
-                >
-                  {priceLabel}
-                </span>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* футер */}
         <div
           style={{
             display: "flex",
@@ -197,7 +242,7 @@ export async function GET(request: NextRequest) {
             color: MUTED,
           }}
         >
-          <span>{data ? `${info.member_count} members already inside` : "Automatic share calculation & reminders"}</span>
+          <span>{`${data.member_count} members already inside`}</span>
           <span style={{ fontWeight: 700, color: "#71717a" }}>kitstartai.com</span>
         </div>
       </div>
@@ -205,11 +250,33 @@ export async function GET(request: NextRequest) {
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: "Inter", data: inter400, weight: 400 },
-        { name: "Inter", data: inter700, weight: 700 },
-        { name: "Inter", data: inter900, weight: 900 },
-      ],
+      fonts,
     }
   );
+}
+
+/**
+ * GET /api/og?title=SubSplit — брендовая OG-картинка 1200x630 для лендинга.
+ * GET /api/og?group=[id] — динамическая OG-картинка группы (шеринг в соцсетях).
+ * Публичный (используется мета-тегами страниц).
+ */
+export async function GET(request: NextRequest) {
+  const groupId = request.nextUrl.searchParams.get("group") ?? "";
+  const title = request.nextUrl.searchParams.get("title") ?? "SubSplit";
+
+  const fonts = [
+    { name: "Inter", data: await inter400, weight: 400 as const },
+    { name: "Inter", data: await inter700, weight: 700 as const },
+    { name: "Inter", data: await inter900, weight: 900 as const },
+  ];
+
+  const data =
+    groupId.length === 36
+      ? await loadGroupData(groupId).catch(() => null)
+      : null;
+
+  if (data) {
+    return GroupCard({ data, fonts });
+  }
+  return BrandCard({ title, fonts });
 }

@@ -390,15 +390,21 @@ export interface Database {
       };
       waitlist: {
         Row: {
+          id: string;
           email: string;
+          source: string;
           created_at: string;
         };
         Insert: {
+          id?: string;
           email: string;
+          source?: string;
           created_at?: string;
         };
         Update: {
+          id?: string;
           email?: string;
+          source?: string;
           created_at?: string;
         };
         Relationships: [];

@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 
 type Status = "idle" | "loading" | "success" | "error";
 
-/** Email-форма в hero: сохраняет заявку в /api/waitlist (Supabase waitlist) */
-export function WaitlistForm() {
+/** Email-capture форма: сохраняет заявку в /api/waitlist + письмо-подтверждение */
+export function EmailCapture() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -45,14 +45,16 @@ export function WaitlistForm() {
   if (status === "success") {
     return (
       <p className="mt-8 rounded-full border border-emerald-600/30 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
-        You're on the list — we'll be in touch!
+        Thanks! Check your inbox.
       </p>
     );
   }
 
   return (
     <div className="mt-8 flex w-full max-w-md flex-col items-center">
-      <p className="text-sm text-muted-foreground">Or get early access updates:</p>
+      <p className="text-sm text-muted-foreground">
+        Or get early access updates:
+      </p>
       <form
         onSubmit={handleSubmit}
         className="mt-3 flex w-full flex-col gap-2 sm:flex-row"
@@ -73,7 +75,7 @@ export function WaitlistForm() {
           {status === "loading" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : null}
-          Join waitlist
+          Join 2,000+ on the waitlist
         </Button>
       </form>
       {status === "error" ? (

@@ -14,7 +14,7 @@ import { SavingsCalculator } from "@/components/landing/savings-calculator";
 import { AppPreview } from "@/components/landing/AppPreview";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { AvailableEverywhere } from "@/components/landing/AvailableEverywhere";
-import { WaitlistForm } from "@/components/landing/WaitlistForm";
+import { EmailCapture } from "@/components/landing/EmailCapture";
 import { FAQ } from "@/components/landing/FAQ";
 import { TrustBadges } from "@/components/trust/TrustBadges";
 
@@ -141,11 +141,11 @@ export default function LandingPage() {
             </Button>
           </div>
 
+          {/* Waitlist email capture */}
+          <EmailCapture />
+
           {/* Trust badges */}
           <TrustBadges />
-
-          {/* Waitlist email capture */}
-          <WaitlistForm />
         </div>
       </section>
 
@@ -234,6 +234,13 @@ export default function LandingPage() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+        </div>
+      </section>
+
+      {/* Waitlist (низ страницы, перед футером) */}
+      <section className="border-t px-4 py-16">
+        <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
+          <EmailCapture />
         </div>
       </section>
     </div>

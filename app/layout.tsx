@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: "%s — SubSplit",
   },
   description:
-    "Split subscription costs with friends: automatic share calculation, reminders and payment tracking for Netflix, Spotify, ChatGPT and more.",
+    "Share Netflix, Spotify, ChatGPT costs automatically. No awkward texts.",
   manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
@@ -33,11 +33,11 @@ export const metadata: Metadata = {
     siteName: "SubSplit",
     title: "SubSplit — Split subscriptions, not friendships",
     description:
-      "Split subscription costs with friends: automatic share calculation, reminders and payment tracking for Netflix, Spotify, ChatGPT and more.",
+      "Share Netflix, Spotify, ChatGPT costs automatically. No awkward texts.",
     locale: "en_US",
     images: [
       {
-        url: "/og-image.png",
+        url: `${SITE_URL}/api/og`,
         width: 1200,
         height: 630,
         alt: "SubSplit — Split subscriptions, not friendships",
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SubSplit — Split subscriptions, not friendships",
     description:
-      "Split subscription costs with friends: automatic share calculation, reminders and payment tracking.",
-    images: ["/og-image.png"],
+      "Share Netflix, Spotify, ChatGPT costs automatically. No awkward texts.",
+    images: [`${SITE_URL}/api/og`],
   },
 };
 
