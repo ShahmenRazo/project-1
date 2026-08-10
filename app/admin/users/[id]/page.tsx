@@ -39,7 +39,7 @@ interface UserDetail {
     display_name: string | null;
     avatar_url: string | null;
     subscription_tier: "free" | "pro";
-    plan_status: string;
+    plan_status: string | null;
     role: "user" | "admin";
     country: string | null;
     last_active: string | null;
@@ -173,6 +173,39 @@ export default function AdminUserDetailPage() {
     }
   }
 
+  const [togglingPro, setTogglingPro] = useState(false);
+
+  async function handleTogglePro() {
+    if (!detail) return;
+    setTogglingPro(true);
+    try {
+      const res = await fetch(`/api/admin/users/${params.id}/toggle-pro`, {
+        method: "POST",
+      });
+      const json = (await res.json().catch(() => null)) as {
+        data?: { pro: boolean };
+        error?: { message?: string };
+      } | null;
+      if (!res.ok || !json?.data) {
+        toast.error(json?.error?.message ?? "Failed to update plan");
+        return;
+      }
+      setDetail({
+        ...detail,
+        profile: {
+          ...detail.profile,
+          subscription_tier: json.data.pro ? "pro" : "free",
+          plan_status: json.data.pro ? "active" : "none",
+        },
+      });
+      toast.success(json.data.pro ? "Pro enabled" : "Pro disabled");
+    } catch {
+      toast.error("Network error, please try again");
+    } finally {
+      setTogglingPro(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -198,7 +231,10 @@ export default function AdminUserDetailPage() {
             {p.display_name ?? "No display name"} · joined {fmt(p.created_at)}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={handleTogglePro} disabled={togglingPro}>
+            {p.subscription_tier === "pro" ? "Revoke Pro" : "Give Pro"}
+          </Button>
           <Button variant="outline" onClick={handleImpersonate} disabled={impersonating}>
             <KeyRound className="h-4 w-4" />
             {impersonating ? "Generating…" : "Impersonate"}

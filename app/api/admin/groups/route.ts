@@ -9,7 +9,8 @@ export async function GET(req: NextRequest) {
     await requireAdmin();
     const admin = createAdminClient();
 
-    const plan = req.nextUrl.searchParams.get("plan");
+    const minMembersParam = req.nextUrl.searchParams.get("min_members");
+    const minMembers = minMembersParam ? Number(minMembersParam) : null;
 
     const { data: groups, error } = await admin
       .from("groups")
@@ -50,8 +51,8 @@ export async function GET(req: NextRequest) {
         : null,
     }));
 
-    if (plan === "free" || plan === "pro") {
-      rows = rows.filter((g) => g.creator_plan === plan);
+    if (minMembers && Number.isFinite(minMembers) && minMembers > 1) {
+      rows = rows.filter((g) => g.member_count >= minMembers);
     }
 
     return Response.json({ data: { groups: rows, total: rows.length } });

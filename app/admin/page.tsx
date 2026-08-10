@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Activity, CalendarPlus, DollarSign, Users, UserCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatMoney } from "@/lib/format";
 
 interface Stats {
@@ -13,6 +23,12 @@ interface Stats {
   pro_users: number;
   mrr: number;
   growth: { date: string; count: number }[];
+  recent_registrations: {
+    id: string;
+    email: string;
+    created_at: string;
+    subscription_tier: "free" | "pro";
+  }[];
   top_subscriptions: { name: string; count: number }[];
   top_countries: { country: string; count: number }[];
 }
@@ -80,7 +96,7 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">User growth — last 14 days</CardTitle>
+            <CardTitle className="text-base">User growth — last 30 days</CardTitle>
           </CardHeader>
           <CardContent>
             {stats ? (
@@ -164,6 +180,57 @@ export default function AdminDashboardPage() {
           </Card>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Recent registrations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {stats ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead className="text-right">Registered</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {stats.recent_registrations.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="py-6 text-center text-sm text-muted-foreground">
+                      No registrations yet
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  stats.recent_registrations.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell>
+                        <Link
+                          href={`/admin/users/${u.id}`}
+                          className="font-medium underline-offset-2 hover:underline"
+                        >
+                          {u.email}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={u.subscription_tier === "pro" ? "default" : "secondary"}>
+                          {u.subscription_tier === "pro" ? "Pro" : "Free"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground tabular-nums">
+                        {shortDate(u.created_at.slice(0, 10))}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          ) : (
+            <Skeleton className="h-40 w-full" />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

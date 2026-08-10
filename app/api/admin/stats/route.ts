@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest) {
     todayStart.setUTCHours(0, 0, 0, 0);
 
     const [usersRes, subsRes, gmRes] = await Promise.all([
-      admin.from("users").select("id, subscription_tier, plan_status, created_at, last_active, country"),
+      admin.from("users").select("id, email, subscription_tier, plan_status, created_at, last_active, country").order("created_at", { ascending: false }),
       admin.from("subscriptions").select("name").is("deleted_at", null),
       admin.from("group_members").select("user_id"),
     ]);
@@ -32,13 +32,12 @@ export async function GET(_req: NextRequest) {
     ).length;
     const newThisWeek = users.filter((u) => new Date(u.created_at) >= new Date(sinceWeek)).length;
     const proUsers = users.filter((u) => u.subscription_tier === "pro").length;
-    const activePro = users.filter((u) => u.plan_status === "active").length;
-    const mrr = Math.round(activePro * PRO_PRICE_USD * 100) / 100;
+    const mrr = Math.round(proUsers * PRO_PRICE_USD * 100) / 100;
 
-    // Рост: последние 14 дней
+    // Рост: последние 30 дней
     const growthMap = new Map<string, number>();
     const days: { date: string; count: number }[] = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = 29; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
       const key = d.toISOString().slice(0, 10);
       growthMap.set(key, 0);
@@ -48,6 +47,14 @@ export async function GET(_req: NextRequest) {
       if (growthMap.has(key)) growthMap.set(key, (growthMap.get(key) ?? 0) + 1);
     }
     for (const [date, count] of growthMap) days.push({ date, count });
+
+    // Последние 10 регистраций
+    const recent_registrations = users.slice(0, 10).map((u) => ({
+      id: u.id,
+      email: u.email,
+      created_at: u.created_at,
+      subscription_tier: u.subscription_tier,
+    }));
 
     // Топ-5 подписок
     const subCounts = new Map<string, number>();
@@ -78,6 +85,7 @@ export async function GET(_req: NextRequest) {
         pro_users: proUsers,
         mrr,
         growth: days,
+        recent_registrations,
         top_subscriptions: topSubscriptions,
         top_countries: topCountries,
       },

@@ -39,7 +39,7 @@ interface AdminGroup {
 
 export default function AdminGroupsPage() {
   const [groups, setGroups] = useState<AdminGroup[]>([]);
-  const [plan, setPlan] = useState<string>("all");
+  const [minMembers, setMinMembers] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +48,7 @@ export default function AdminGroupsPage() {
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (plan !== "all") params.set("plan", plan);
+      if (minMembers !== "all") params.set("min_members", minMembers);
       const res = await fetch(`/api/admin/groups?${params}`);
       if (!res.ok) throw new Error(String(res.status));
       const json = (await res.json()) as { data: { groups: AdminGroup[] } };
@@ -58,7 +58,7 @@ export default function AdminGroupsPage() {
     } finally {
       setLoading(false);
     }
-  }, [plan]);
+  }, [minMembers]);
 
   useEffect(() => {
     void load();
@@ -72,15 +72,17 @@ export default function AdminGroupsPage() {
           <p className="text-sm text-muted-foreground">{groups.length} shown</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Creator plan:</span>
-          <Select value={plan} onValueChange={setPlan}>
+          <span className="text-sm text-muted-foreground">Members:</span>
+          <Select value={minMembers} onValueChange={setMinMembers}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="free">Free</SelectItem>
-              <SelectItem value="pro">Pro</SelectItem>
+              <SelectItem value="2">2+ members</SelectItem>
+              <SelectItem value="3">3+ members</SelectItem>
+              <SelectItem value="4">4+ members</SelectItem>
+              <SelectItem value="5">5+ members</SelectItem>
             </SelectContent>
           </Select>
         </div>

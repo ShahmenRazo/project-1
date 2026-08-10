@@ -7,6 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -29,7 +36,7 @@ interface AdminUser {
   groups_count: number;
 }
 
-const PAGE_SIZE = 25;
+const PAGE_SIZES = [10, 25, 50];
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
@@ -44,6 +51,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +60,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
       if (q.trim()) params.set("q", q.trim());
       const res = await fetch(`/api/admin/users?${params}`);
       if (!res.ok) throw new Error(String(res.status));
@@ -64,13 +72,13 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, q]);
+  }, [page, pageSize, q]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="space-y-6">
@@ -172,11 +180,29 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground tabular-nums">
           Page {page} of {totalPages}
         </p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={String(pageSize)}
+            onValueChange={(v) => {
+              setPageSize(Number(v));
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-[110px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_SIZES.map((s) => (
+                <SelectItem key={s} value={String(s)}>
+                  {s} / page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             variant="outline"
             size="sm"
