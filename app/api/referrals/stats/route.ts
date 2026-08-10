@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fail, ok, requireUser } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/referrals/stats — статистика рефералов текущего пользователя:
  * сколько пригласил и сколько из них оформили Pro.

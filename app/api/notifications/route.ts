@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { fail, ok, parseBody, requireUser } from "@/lib/api";
 import { notificationsQuerySchema } from "@/lib/schemas";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/notifications?limit=50&unread_only=true
 export async function GET(request: NextRequest) {
   try {

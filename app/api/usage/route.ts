@@ -2,6 +2,8 @@ import { withProRoute } from "@/lib/billing/tier";
 import { ok } from "@/lib/api";
 import { roundMoney } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/usage — статистика пользователя (Pro-only, через withProRoute)
 // Показывает, как работает HOC-гвард: free-пользователи получают 402.
 export const GET = withProRoute(async (_request, _ctx, supabase, userId) => {
