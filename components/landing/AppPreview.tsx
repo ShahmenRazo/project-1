@@ -17,16 +17,16 @@ const SCREENSHOTS = [
     text: "Groups with fair shares. Everyone sees their part down to the penny.",
     src: "/screenshots/group.png",
     alt: "SubSplit group page The Apartment with member shares",
-    width: 768,
-    height: 524,
+    width: 1280,
+    height: 750,
   },
   {
     caption: "Get reminded",
     text: "Automatic reminders (with memes) so nobody has to ask twice.",
     src: "/screenshots/reminder.png",
     alt: "SubSplit payment reminder notification",
-    width: 330,
-    height: 291,
+    width: 320,
+    height: 261,
   },
 ] as const;
 
