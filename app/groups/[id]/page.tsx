@@ -51,6 +51,7 @@ export default async function GroupPage({
         .from("subscriptions")
         .select("name, price, currency, billing_cycle, billing_day")
         .eq("id", group.subscription_id)
+        .is("deleted_at", null)
         .maybeSingle(),
       supabase
         .from("payments")

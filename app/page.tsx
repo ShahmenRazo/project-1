@@ -44,6 +44,7 @@ export default async function DashboardPage() {
       .select(
         "id, name, category, price, currency, billing_cycle, billing_day, created_at, groups(id, name, creator_id)"
       )
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
       .from("users")

@@ -92,6 +92,7 @@ export interface Database {
           currency: string;
           billing_cycle: BillingCycle;
           billing_day: number;
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -104,6 +105,7 @@ export interface Database {
           currency?: string;
           billing_cycle?: BillingCycle;
           billing_day?: number;
+          deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -116,6 +118,7 @@ export interface Database {
           currency?: string;
           billing_cycle?: BillingCycle;
           billing_day?: number;
+          deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

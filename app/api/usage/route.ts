@@ -10,7 +10,8 @@ export const GET = withProRoute(async (_request, _ctx, supabase, userId) => {
       supabase
         .from("subscriptions")
         .select("id", { count: "exact", head: true })
-        .eq("user_id", userId),
+        .eq("user_id", userId)
+        .is("deleted_at", null),
       supabase.from("groups").select("id").eq("creator_id", userId),
       supabase.from("group_members").select("group_id").eq("user_id", userId),
     ]);

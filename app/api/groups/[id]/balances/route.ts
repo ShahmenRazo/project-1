@@ -53,6 +53,7 @@ export async function GET(
           .from("subscriptions")
           .select("name, price, currency")
           .eq("id", group.subscription_id)
+          .is("deleted_at", null)
           .single(),
       ]);
 

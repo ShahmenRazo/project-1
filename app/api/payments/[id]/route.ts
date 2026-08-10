@@ -8,11 +8,12 @@ import {
   requireUser,
 } from "@/lib/api";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createNotification } from "@/lib/notifications";
+import { notifyUser } from "@/lib/notifications";
 
-// POST /api/payments/[id]/mark-paid — отметить долг оплаченным
-// Идемпотентно: повторный вызов возвращает тот же payment без ошибки
-export async function POST(
+// PUT /api/payments/[id] — отметить долг оплаченным
+// Участвовать могут только должник (from_user_id) или получатель (to_user_id).
+// Идемпотентно: повторный вызов возвращает тот же payment без ошибки.
+export async function PUT(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -30,7 +31,7 @@ export async function POST(
     if (findError) throw findError;
     if (!payment) throw new ApiError(404, "Payment not found", "NOT_FOUND");
 
-    // Участвовать могут только должник или получатель (RLS тоже ограничит)
+    // Проверка участия (RLS тоже ограничит, но для честного 403 — явно)
     const isInvolved =
       payment.from_user_id === user.id || payment.to_user_id === user.id;
     if (!isInvolved) {
@@ -41,7 +42,7 @@ export async function POST(
       );
     }
 
-    // Идемпотентность
+    // Идемпотентность: уже оплачен — отдаём как есть
     if (payment.status === "paid") {
       return ok(payment);
     }
@@ -73,11 +74,12 @@ export async function POST(
       counterpart?.email.split("@")[0] ??
       "User";
 
-    await createNotification(
-      counterpartId,
-      "payment_paid",
-      `${name} marked ${payment.amount} ${payment.currency} as paid`
-    );
+    const message = `${name} подтвердил(а) оплату ${payment.amount} ${payment.currency}`;
+    await notifyUser(counterpartId, "payment_paid", message, {
+      title: "SubSplit: долг оплачен",
+      body: message,
+      url: payment.group_id ? `/groups/${payment.group_id}` : "/",
+    });
 
     return ok(updated);
   } catch (error) {

@@ -17,11 +17,12 @@ export async function POST(request: NextRequest) {
     const user = await requireUser(supabase);
     const input = await parseBody(request, subscriptionSchema);
 
-    // Лимит тарифа: Free — до 3 подписок
+    // Лимит тарифа: Free — до 3 подписок (удалённые не считаются)
     const { count } = await supabase
       .from("subscriptions")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .is("deleted_at", null);
     const limits = await getUserLimits(supabase, user.id);
     if ((count ?? 0) >= limits.max_subscriptions) {
       throw new ApiError(
@@ -56,6 +57,7 @@ export async function GET() {
       .select(
         "id, name, category, price, currency, billing_cycle, billing_day, created_at, updated_at, groups(id, name, creator_id)"
       )
+      .is("deleted_at", null)
       .order("created_at", { ascending: false });
 
     if (error) throw error;

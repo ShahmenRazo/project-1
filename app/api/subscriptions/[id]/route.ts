@@ -31,6 +31,7 @@ export async function PUT(
       .select("id")
       .eq("id", params.id)
       .eq("user_id", user.id)
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (findError) throw findError;
@@ -43,6 +44,7 @@ export async function PUT(
       .update(input)
       .eq("id", params.id)
       .eq("user_id", user.id)
+      .is("deleted_at", null)
       .select()
       .single();
 
@@ -54,7 +56,8 @@ export async function PUT(
   }
 }
 
-// DELETE /api/subscriptions/[id] — удалить подписку
+// DELETE /api/subscriptions/[id] — мягко удалить подписку (soft-delete)
+// Строка остаётся в БД с deleted_at = now(): группы/история платежей не теряются.
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
@@ -69,6 +72,7 @@ export async function DELETE(
       .select("id")
       .eq("id", params.id)
       .eq("user_id", user.id)
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (findError) throw findError;
@@ -78,7 +82,7 @@ export async function DELETE(
 
     const { error } = await supabase
       .from("subscriptions")
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq("id", params.id)
       .eq("user_id", user.id);
 

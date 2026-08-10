@@ -69,6 +69,7 @@ export async function POST(
       .from("subscriptions")
       .select("user_id, name, price, currency, billing_cycle, billing_day")
       .eq("id", group.subscription_id)
+      .is("deleted_at", null)
       .single();
 
     if (subError || !subscription) {

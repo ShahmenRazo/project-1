@@ -35,15 +35,24 @@ $$;
 --    id совпадает с auth.users.id (Supabase Auth)
 -- ---------------------------------------------------------------------------
 create table public.users (
-  id                  uuid primary key references auth.users (id) on delete cascade,
-  email               text not null unique,
-  display_name        text,
-  avatar_url          text,
-  subscription_tier   text not null default 'free'
-                      check (subscription_tier in ('free', 'pro')),
-  created_at          timestamptz not null default now(),
-  updated_at          timestamptz not null default now()
+  id                        uuid primary key references auth.users (id) on delete cascade,
+  email                     text not null unique,
+  display_name              text,
+  avatar_url                text,
+  subscription_tier         text not null default 'free'
+                            check (subscription_tier in ('free', 'pro')),
+  -- Интеграция LemonSqueezy (обновляется вебхуком /api/billing/webhook)
+  ls_customer_id            text,
+  ls_subscription_id        text,
+  ls_subscription_item_id   text,
+  plan_status               text not null default 'none',
+  plan_expires_at           timestamptz,
+  created_at                timestamptz not null default now(),
+  updated_at                timestamptz not null default now()
 );
+
+create index idx_users_ls_customer_id on public.users (ls_customer_id);
+create index idx_users_ls_subscription_id on public.users (ls_subscription_id);
 
 -- Авто-создание профиля при регистрации пользователя
 create or replace function public.handle_new_user()
@@ -83,12 +92,14 @@ create table public.subscriptions (
   billing_cycle text not null default 'monthly'
                 check (billing_cycle in ('monthly', 'yearly')),
   billing_day   integer not null default 1 check (billing_day between 1 and 28),
+  deleted_at    timestamptz,          -- soft-delete: не null = подписка "удалена"
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
 
 create index idx_subscriptions_user_id    on public.subscriptions (user_id);
 create index idx_subscriptions_billing_day on public.subscriptions (billing_day);
+create index idx_subscriptions_deleted_at on public.subscriptions (deleted_at) where deleted_at is null;
 
 create trigger trg_subscriptions_updated_at
   before update on public.subscriptions
@@ -142,6 +153,7 @@ create table public.payments (
                check (status in ('pending', 'paid')),
   due_date     date not null,
   paid_at      timestamptz,
+  last_reminded_at timestamptz,   -- защита ежедневного cron от повторных напоминаний
   created_at   timestamptz not null default now(),
   constraint chk_payments_distinct_users check (from_user_id <> to_user_id)
 );
@@ -152,6 +164,7 @@ create index idx_payments_group_id     on public.payments (group_id);
 create index idx_payments_status       on public.payments (status);
 create index idx_payments_due_date     on public.payments (due_date);
 create index idx_payments_from_status  on public.payments (from_user_id, status);
+create index idx_payments_pending_due  on public.payments (status, due_date);
 
 -- ---------------------------------------------------------------------------
 -- 6. notifications — уведомления
@@ -167,6 +180,24 @@ create table public.notifications (
 
 create index idx_notifications_user_read     on public.notifications (user_id, read);
 create index idx_notifications_user_created  on public.notifications (user_id, created_at desc);
+
+-- ---------------------------------------------------------------------------
+-- 7. push_subscriptions — FCM-токены устройств для push-уведомлений
+-- ---------------------------------------------------------------------------
+create table public.push_subscriptions (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references public.users (id) on delete cascade,
+  token      text not null unique,
+  device     text not null default 'web',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index idx_push_subscriptions_user_id on public.push_subscriptions (user_id);
+
+create trigger trg_push_subscriptions_updated_at
+  before update on public.push_subscriptions
+  for each row execute function public.set_updated_at();
 
 -- ============================================================================
 -- ROW LEVEL SECURITY
@@ -302,8 +333,25 @@ create policy "notifications_update_own" on public.notifications
 create policy "notifications_delete_own" on public.notifications
   for delete using (auth.uid() = user_id);
 
+-- ---------------- push_subscriptions ----------------
+alter table public.push_subscriptions enable row level security;
+
+create policy "push_subscriptions_select_own" on public.push_subscriptions
+  for select using (auth.uid() = user_id);
+
+create policy "push_subscriptions_insert_own" on public.push_subscriptions
+  for insert with check (auth.uid() = user_id);
+
+create policy "push_subscriptions_update_own" on public.push_subscriptions
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "push_subscriptions_delete_own" on public.push_subscriptions
+  for delete using (auth.uid() = user_id);
+
 -- ============================================================================
 -- Полезный вид: итог по группе (сколько должен/сколько ждёт каждый участник)
+-- Долги считаются ТОЛЬКО по платежам текущей группы (фикс: раньше подзапросы
+-- суммировали по всем группам пользователя и задваивали суммы).
 -- ============================================================================
 create or replace view public.group_balances as
 select
@@ -316,23 +364,22 @@ select
   coalesce(pd.amount, 0)                      as to_receive     -- сколько должны ему
 from public.groups g
 join public.group_members gm on gm.group_id = g.id
-join public.subscriptions s on s.id = g.subscription_id
+join public.subscriptions s on s.id = g.subscription_id and s.deleted_at is null
 left join (
-  select from_user_id, sum(amount) as amount
+  select group_id, from_user_id, sum(amount) as amount
   from public.payments
   where status = 'pending'
-  group by from_user_id
-) up on up.from_user_id = gm.user_id
+  group by group_id, from_user_id
+) up on up.group_id = g.id and up.from_user_id = gm.user_id
 left join (
-  select to_user_id, sum(amount) as amount
+  select group_id, to_user_id, sum(amount) as amount
   from public.payments
   where status = 'pending'
-  group by to_user_id
-) pd on pd.to_user_id = gm.user_id;
+  group by group_id, to_user_id
+) pd on pd.group_id = g.id and pd.to_user_id = gm.user_id;
 
 -- ============================================================================
--- Примечание (вне скрипта, для продакшена):
--- для PWA web-push понадобится таблица push_subscriptions
--- (endpoint, p256dh, auth ключи) с RLS user_id = auth.uid().
--- Добавим на следующем шаге вместе с путями /api/push/*.
+-- Примечание: для свежей базы этот скрипт создаёт всё, включая
+-- push_subscriptions и soft-delete (subscriptions.deleted_at).
+-- Для уже существующей БД применяйте миграции из supabase/migrations/ по порядку.
 -- ============================================================================
