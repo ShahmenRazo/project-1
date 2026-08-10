@@ -49,6 +49,22 @@ export default async function JoinPage({
 }) {
   const info = await getPublicInviteInfo(params.token).catch(() => null);
 
+  let debugDump: string | null = null;
+  if (info?.valid) {
+    const admin = createAdminClient();
+    const { data: rows } = await admin
+      .from("group_members")
+      .select("user_id, share_percent")
+      .eq("group_id", info.group_id);
+    debugDump = JSON.stringify({
+      token: params.token,
+      share_percent: info.share_percent,
+      share_monthly: info.share_monthly,
+      rows: rows ?? null,
+      member_count: info.member_count,
+    });
+  }
+
   // Пользователь уже залогинен?
   const supabase = createClient();
   const {
