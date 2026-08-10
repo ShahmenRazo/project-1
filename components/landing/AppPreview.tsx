@@ -178,7 +178,9 @@ function NotificationsShot() {
           <Bell className="h-4 w-4" />
         </span>
         <div>
-          <p className="text-[11px] font-medium">Meme reminder sent to Masha</p>
+          <p className="text-[11px] font-medium">
+            Meme reminder sent to Jordan
+          </p>
           <p className="text-[10px] text-muted-foreground">
             "Your roommates miss your $3.30 🍕"
           </p>
