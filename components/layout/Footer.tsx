@@ -10,7 +10,7 @@ const COPY = {
       links: [
         { label: "Features", href: "/#how-it-works" },
         { label: "Pricing", href: "/pricing" },
-        { label: "FAQ", href: "/pricing#faq" },
+        { label: "FAQ", href: "/#faq" },
       ],
     },
     {
@@ -23,8 +23,8 @@ const COPY = {
     {
       title: "Legal",
       links: [
-        { label: "Privacy", href: "/privacy" },
-        { label: "Terms", href: "/terms" },
+        { label: "Privacy Policy", href: "/privacy" },
+        { label: "Terms of Service", href: "/terms" },
       ],
     },
   ],
@@ -44,57 +44,58 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className={className}
+      aria-hidden
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function TwitterIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 export function Footer() {
   return (
-    <footer className="border-t">
+    <footer className="border-t border-zinc-800 bg-zinc-950 text-zinc-400">
       <div className="mx-auto max-w-5xl px-4 py-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-semibold text-zinc-100"
+            >
               <ShieldCheck className="h-5 w-5" />
               {COPY.brand}
             </Link>
-            <p className="text-sm text-muted-foreground">{COPY.tagline}</p>
-            <div className="flex items-center gap-3">
-              <a
-                href="#"
-                aria-label="X (Twitter)"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden>
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                aria-label="TikTok"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <TikTokIcon className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                aria-label="Instagram"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden>
-                  <rect x="2" y="2" width="20" height="20" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-                </svg>
-              </a>
-            </div>
+            <p className="text-sm">{COPY.tagline}</p>
           </div>
 
           {COPY.columns.map((col) => (
             <div key={col.title}>
-              <h3 className="text-sm font-semibold">{col.title}</h3>
+              <h3 className="text-sm font-semibold text-zinc-200">
+                {col.title}
+              </h3>
               <ul className="mt-4 space-y-2.5 text-sm">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground transition-colors hover:text-foreground"
+                      className="transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -105,8 +106,31 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 border-t pt-6">
-          <p className="text-sm text-muted-foreground">{COPY.copyright}</p>
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-zinc-800 pt-6 sm:flex-row">
+          <p className="text-sm">{COPY.copyright}</p>
+          <div className="flex items-center gap-4">
+            <a
+              href="#"
+              aria-label="X (Twitter)"
+              className="transition-colors hover:text-white"
+            >
+              <TwitterIcon className="h-4 w-4" />
+            </a>
+            <a
+              href="#"
+              aria-label="TikTok"
+              className="transition-colors hover:text-white"
+            >
+              <TikTokIcon className="h-4 w-4" />
+            </a>
+            <a
+              href="#"
+              aria-label="Instagram"
+              className="transition-colors hover:text-white"
+            >
+              <InstagramIcon className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </div>
     </footer>

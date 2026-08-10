@@ -11,6 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+const PEOPLE = 4;
+
+function shareOf(price: number): string {
+  return (Math.round(price * 100) / PEOPLE / 100).toFixed(2);
+}
+
 const SCREENSHOTS = [
   {
     caption: "Your subscriptions",
@@ -30,21 +36,21 @@ const SCREENSHOTS = [
 ] as const;
 
 const SUBS = [
-  { name: "Netflix", price: "$15.99", icon: Film, color: "bg-red-500", share: "Your share $5.33" },
-  { name: "Spotify", price: "$10.99", icon: Music, color: "bg-green-500", share: "Your share $3.66" },
-  { name: "ChatGPT", price: "$20.00", icon: Sparkles, color: "bg-teal-500", share: "Your share $6.67" },
+  { name: "Netflix", price: 15.99, icon: Film, color: "bg-red-500" },
+  { name: "Spotify", price: 10.99, icon: Music, color: "bg-green-500" },
+  { name: "ChatGPT", price: 20, icon: Sparkles, color: "bg-teal-500" },
 ] as const;
 
 const MEMBERS = [
-  { initials: "VA", name: "Vanya", share: "25%" },
-  { initials: "MA", name: "Masha", share: "25%" },
-  { initials: "DI", name: "Dima", share: "25%" },
-  { initials: "LE", name: "Lena", share: "25%" },
+  { initials: "AL", name: "Alex", share: "25%" },
+  { initials: "JO", name: "Jordan", share: "25%" },
+  { initials: "SA", name: "Sam", share: "25%" },
+  { initials: "TA", name: "Taylor", share: "25%" },
 ] as const;
 
 const STATUSES = [
-  { name: "Vanya", text: "paid ✓", paid: true },
-  { name: "Masha", text: "pending", paid: false },
+  { name: "Alex", text: "paid ✓", paid: true },
+  { name: "Jordan", text: "pending", paid: false },
 ] as const;
 
 function WindowFrame({ children }: { children: React.ReactNode }) {
@@ -63,6 +69,8 @@ function WindowFrame({ children }: { children: React.ReactNode }) {
 }
 
 function DashboardShot() {
+  const total = SUBS.reduce((sum, s) => sum + s.price, 0);
+  const yourShare = SUBS.reduce((sum, s) => sum + Number(shareOf(s.price)), 0);
   return (
     <div className="space-y-2.5 p-4">
       <div className="flex items-center justify-between">
@@ -83,14 +91,20 @@ function DashboardShot() {
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">{sub.name}</p>
-            <p className="text-[11px] text-muted-foreground">{sub.share}</p>
+            <p className="text-[11px] text-muted-foreground">
+              Your share ${shareOf(sub.price)}
+            </p>
           </div>
-          <span className="text-sm font-semibold">{sub.price}</span>
+          <span className="text-sm font-semibold">
+            ${sub.price.toFixed(2)}
+          </span>
         </div>
       ))}
       <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-[11px] text-muted-foreground">
-        <span>Total: $46.99</span>
-        <span className="font-medium text-foreground">Your share: $15.66</span>
+        <span>Total: ${total.toFixed(2)}</span>
+        <span className="font-medium text-foreground">
+          Your share: ${yourShare.toFixed(2)}
+        </span>
       </div>
     </div>
   );
@@ -153,7 +167,7 @@ function NotificationsShot() {
         </span>
         <div>
           <p className="text-[11px] font-medium">
-            Vanya sent you <span className="font-semibold">$4.50</span> for
+            Alex sent you <span className="font-semibold">$4.00</span> for
             Netflix
           </p>
           <p className="text-[10px] text-muted-foreground">2 min ago</p>
@@ -164,9 +178,7 @@ function NotificationsShot() {
           <Bell className="h-4 w-4" />
         </span>
         <div>
-          <p className="text-[11px] font-medium">
-            Meme reminder sent to Masha
-          </p>
+          <p className="text-[11px] font-medium">Meme reminder sent to Masha</p>
           <p className="text-[10px] text-muted-foreground">
             "Your roommates miss your $3.30 🍕"
           </p>

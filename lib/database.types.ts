@@ -388,6 +388,21 @@ export interface Database {
           }
         ];
       };
+      waitlist: {
+        Row: {
+          email: string;
+          created_at: string;
+        };
+        Insert: {
+          email: string;
+          created_at?: string;
+        };
+        Update: {
+          email?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       error_reports: {
         Row: {
           id: string;

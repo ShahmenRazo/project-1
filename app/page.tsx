@@ -14,6 +14,8 @@ import { SavingsCalculator } from "@/components/landing/savings-calculator";
 import { AppPreview } from "@/components/landing/AppPreview";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { AvailableEverywhere } from "@/components/landing/AvailableEverywhere";
+import { WaitlistForm } from "@/components/landing/WaitlistForm";
+import { FAQ } from "@/components/landing/FAQ";
 import { TrustBadges } from "@/components/trust/TrustBadges";
 
 export const dynamic = "force-dynamic";
@@ -141,6 +143,9 @@ export default function LandingPage() {
 
           {/* Trust badges */}
           <TrustBadges />
+
+          {/* Waitlist email capture */}
+          <WaitlistForm />
         </div>
       </section>
 
@@ -211,6 +216,9 @@ export default function LandingPage() {
 
       {/* Available everywhere */}
       <AvailableEverywhere />
+
+      {/* FAQ */}
+      <FAQ />
 
       {/* CTA */}
       <section className="border-t bg-primary px-4 py-16 text-primary-foreground">
