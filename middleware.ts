@@ -9,7 +9,9 @@ import { checkRateLimit } from "@/lib/rate-limit";
  * - /dashboard/*, /groups/*, /profile/* — только для авторизованных (иначе /login)
  * - /api/* — только для авторизованных (иначе 401 JSON);
  *   исключения: /api/billing/webhook (LemonSqueezy), /api/cron/* (Bearer CRON_SECRET),
- *   /api/invites/* (публичная проверка приглашения по токену)
+ *   /api/invites/* (публичная проверка приглашения по токену),
+ *   /api/public-invites/* (публичные ссылки: страницы сами проверяют авторизацию),
+ *   /api/og (динамические OG-картинки для соцсетей)
  * - /login — для авторизованных редирект на /dashboard
  * - публичные: / (landing), /pricing, /auth/callback, /invite/[token]
  */
@@ -76,7 +78,9 @@ export async function middleware(request: NextRequest) {
     isApi &&
     !pathname.startsWith("/api/billing/webhook") &&
     !pathname.startsWith("/api/cron/") &&
-    !pathname.startsWith("/api/invites/");
+    !pathname.startsWith("/api/invites/") &&
+    !pathname.startsWith("/api/public-invites/") &&
+    !pathname.startsWith("/api/og");
   const isProtectedPage =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/groups") ||
