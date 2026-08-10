@@ -76,6 +76,7 @@ export async function POST(
 
     const supabase = createClient();
     const user = await requireUser(supabase);
+    const admin = createAdminClient();
 
     const invite = await fetchInviteByToken(params.token);
     if (!invite) {
@@ -145,8 +146,9 @@ export async function POST(
       );
     }
 
-    // --- 1. Добавляем участника ---
-    const { error: insertError } = await supabase.from("group_members").insert({
+    // --- 1. Добавляем участника (admin-клиент: только авторизованный
+    // пользователь с этим email прошёл проверку выше) ---
+    const { error: insertError } = await admin.from("group_members").insert({
       group_id: group.id,
       user_id: user.id,
       share_percent: invite.share_percent,
@@ -162,7 +164,7 @@ export async function POST(
     );
 
     if (user.id !== subscription.user_id) {
-      const { error: payError } = await supabase.from("payments").insert({
+      const { error: payError } = await admin.from("payments").insert({
         group_id: group.id,
         from_user_id: user.id,
         to_user_id: subscription.user_id,
@@ -175,7 +177,6 @@ export async function POST(
     }
 
     // --- 3. Уведомляем создателя ---
-    const admin = createAdminClient();
     const { data: creatorProfile } = await admin
       .from("users")
       .select("display_name, email")
@@ -196,7 +197,7 @@ export async function POST(
     );
 
     // --- 4. Удаляем invite (одноразовый) ---
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await admin
       .from("invites")
       .delete()
       .eq("id", invite.id);
