@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(900px 480px at 12% -10%, rgba(52,211,153,0.22), transparent 60%), linear-gradient(180deg, #0d0d10 0%, #09090b 100%)",
+              "radial-gradient(circle at 12% -10%, rgba(52,211,153,0.22), transparent 60%), linear-gradient(180deg, #0d0d10 0%, #09090b 100%)",
           }}
         />
 
