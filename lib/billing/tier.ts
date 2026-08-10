@@ -37,7 +37,7 @@ export async function requirePro(
   if (tier !== "pro") {
     throw new ApiError(
       402,
-      "Эта функция доступна только на плане Pro",
+      "This feature is only available on the Pro plan",
       "UPGRADE_REQUIRED"
     );
   }

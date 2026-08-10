@@ -131,12 +131,12 @@ export async function POST(request: NextRequest) {
       await createNotification(
         userId,
         "system",
-        "Реферальный бонус: +1 месяц Pro за вашу рекомендацию"
+        "Referral bonus: +1 month of Pro for your recommendation"
       );
       await createNotification(
         referral.referred_by,
         "system",
-        "Ваш реферал оформил Pro — вы получили +1 месяц Pro бесплатно"
+        "Your referral upgraded to Pro — you got +1 month of Pro free"
       );
     }
   }
@@ -146,8 +146,8 @@ export async function POST(request: NextRequest) {
     userId,
     "system",
     tier === "pro"
-      ? `План Pro активирован — все лимиты сняты`
-      : `Подписка Pro завершена — вы переведены на тариф Free`
+      ? `Pro plan activated — all limits removed`
+      : `Pro subscription ended — you've been moved to the Free plan`
   );
 
   return NextResponse.json({ received: true, event, tier });

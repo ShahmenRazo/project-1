@@ -34,10 +34,10 @@ export interface AppShellUser {
 }
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Дашборд", icon: LayoutDashboard },
-  { href: "/groups", label: "Группы", icon: Users },
-  { href: "/pricing", label: "Тарифы", icon: Gem },
-  { href: "/profile", label: "Профиль", icon: User },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/groups", label: "Groups", icon: Users },
+  { href: "/pricing", label: "Pricing", icon: Gem },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
 export function AppShell({
@@ -87,7 +87,7 @@ export function AppShell({
               <DropdownMenuTrigger asChild>
                 <button
                   className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ring-offset-background transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label="Меню аккаунта"
+                  aria-label="Account menu"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>{initials}</AvatarFallback>
@@ -106,12 +106,12 @@ export function AppShell({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile">
-                    <User className="mr-2 h-4 w-4" /> Профиль
+                    <User className="mr-2 h-4 w-4" /> Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/pricing">
-                    <Gem className="mr-2 h-4 w-4" /> Тарифы
+                    <Gem className="mr-2 h-4 w-4" /> Pricing
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -123,7 +123,7 @@ export function AppShell({
                   }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  {signingOut ? "Выход..." : "Выйти"}
+                  {signingOut ? "Signing out..." : "Sign out"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

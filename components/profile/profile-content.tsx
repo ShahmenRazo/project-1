@@ -35,21 +35,21 @@ export function ProfileContent({
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Профиль</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground">
-          Данные аккаунта и тариф
+          Account details and plan
         </p>
       </div>
 
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <UserIcon className="h-4 w-4" /> Аккаунт
+            <UserIcon className="h-4 w-4" /> Account
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-muted-foreground">Имя</span>
+            <span className="text-muted-foreground">Name</span>
             <span className="font-medium">
               {user.display_name ?? "—"}
             </span>
@@ -62,7 +62,7 @@ export function ProfileContent({
             </span>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-muted-foreground">Тариф</span>
+            <span className="text-muted-foreground">Plan</span>
             <Badge variant={user.subscription_tier === "pro" ? "default" : "secondary"}>
               {user.subscription_tier === "pro" ? "Pro" : "Free"}
             </Badge>
@@ -73,18 +73,18 @@ export function ProfileContent({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Gem className="h-4 w-4" /> Тариф
+            <Gem className="h-4 w-4" /> Plan
           </CardTitle>
           <CardDescription>
-            На Free доступно 3 подписки и до 2 человек в группе. Pro снимает
-            ограничения.
+            Free includes 3 subscriptions and up to 2 people per group. Pro
+            removes the limits.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild variant="outline" className="w-full">
             <Link href="/pricing">
               <CreditCard className="h-4 w-4" />
-              {user.subscription_tier === "pro" ? "Управление тарифом" : "Перейти на Pro"}
+              {user.subscription_tier === "pro" ? "Manage plan" : "Go Pro"}
             </Link>
           </Button>
         </CardContent>
@@ -97,7 +97,7 @@ export function ProfileContent({
         disabled={signingOut}
       >
         <LogOut className="h-4 w-4" />
-        {signingOut ? "Выход…" : "Выйти из аккаунта"}
+        {signingOut ? "Signing out…" : "Sign out"}
       </Button>
     </div>
   );

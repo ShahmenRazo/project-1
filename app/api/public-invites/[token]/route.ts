@@ -133,8 +133,8 @@ export async function POST(
       "system",
       `${user.email} joined group "${info.group_name}"`,
       {
-        title: "SubSplit: новый участник",
-        body: `${user.email} присоединился по публичной ссылке`,
+        title: "SubSplit: new member",
+        body: `${user.email} joined via public link`,
         url: `/groups/${info.group_id}`,
       }
     );

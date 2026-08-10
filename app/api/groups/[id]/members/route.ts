@@ -99,7 +99,7 @@ export async function POST(
     if ((currentMembers?.length ?? 0) + 1 > limits.max_group_members) {
       throw new ApiError(
         402,
-        `На тарифе Free в группе может быть максимум ${limits.max_group_members} человека. Перейдите на Pro`,
+        `On the Free plan a group can have at most ${limits.max_group_members} people. Upgrade to Pro`,
         "UPGRADE_REQUIRED"
       );
     }
@@ -153,8 +153,8 @@ export async function POST(
         "group_invite",
         `You were added to group "${group.name}" for ${subscription.name}`,
         {
-          title: "SubSplit: новый долг",
-          body: `Вы должны ${formatMoney(amount, subscription.currency)} за ${subscription.name}`,
+          title: "SubSplit: new debt",
+          body: `You owe ${formatMoney(amount, subscription.currency)} for ${subscription.name}`,
           url: `/groups/${group.id}`,
         }
       );

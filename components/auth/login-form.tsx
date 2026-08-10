@@ -40,7 +40,7 @@ export function LoginForm() {
       if (error) throw error;
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Не удалось начать вход через Google"
+        error instanceof Error ? error.message : "Failed to start Google sign-in"
       );
       setOauthLoading(false);
     }
@@ -59,7 +59,7 @@ export function LoginForm() {
           password,
         });
         if (error) throw error;
-        toast.success("Добро пожаловать!");
+        toast.success("Welcome back!");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -69,7 +69,7 @@ export function LoginForm() {
           },
         });
         if (error) throw error;
-        toast.success("Аккаунт создан. Добро пожаловать!");
+        toast.success("Account created. Welcome!");
         trackEvent("sign_up", { method: "email" });
       }
 
@@ -77,7 +77,7 @@ export function LoginForm() {
       router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Что-то пошло не так"
+        error instanceof Error ? error.message : "Something went wrong"
       );
     } finally {
       setLoading(false);
@@ -111,12 +111,12 @@ export function LoginForm() {
             d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75Z"
           />
         </svg>
-        {oauthLoading ? "Перенаправление…" : "Войти через Google"}
+        {oauthLoading ? "Redirecting…" : "Continue with Google"}
       </Button>
 
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />
-        <span className="text-xs text-muted-foreground">или</span>
+        <span className="text-xs text-muted-foreground">or</span>
         <Separator className="flex-1" />
       </div>
 
@@ -134,7 +134,7 @@ export function LoginForm() {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="password">Пароль</Label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
@@ -155,40 +155,40 @@ export function LoginForm() {
             href="/reset-password"
             className="text-xs text-muted-foreground hover:text-foreground"
           >
-            Забыли пароль?
+            Forgot password?
           </a>
         </div>
       )}
 
       <Button type="submit" disabled={loading} className="mt-2 w-full">
         {loading
-          ? "Подождите…"
+          ? "Please wait…"
           : mode === "login"
-            ? "Войти через email"
-            : "Зарегистрироваться"}
+            ? "Sign in with email"
+            : "Create account"}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         {mode === "login" ? (
           <>
-            Нет аккаунта?{" "}
+            No account?{" "}
             <button
               type="button"
               className="font-medium text-foreground underline underline-offset-4"
               onClick={() => setMode("signup")}
             >
-              Регистрация
+              Sign up
             </button>
           </>
         ) : (
           <>
-            Уже есть аккаунт?{" "}
+            Already have an account?{" "}
             <button
               type="button"
               className="font-medium text-foreground underline underline-offset-4"
               onClick={() => setMode("login")}
             >
-              Войти
+              Sign in
             </button>
           </>
         )}

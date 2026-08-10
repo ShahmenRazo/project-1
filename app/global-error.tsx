@@ -22,16 +22,16 @@ export default function GlobalError({
           </div>
 
           <h1 className="mt-6 text-2xl font-bold tracking-tight">
-            Критическая ошибка
+            Critical error
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Не удалось загрузить приложение. Перезагрузите страницу или
-            зайдите позже.
+            Failed to load the app. Reload the page or
+            try again later.
           </p>
 
           {error?.digest && (
             <p className="mt-2 font-mono text-xs text-muted-foreground">
-              Код ошибки: {error.digest}
+              Error code: {error.digest}
             </p>
           )}
 
@@ -40,7 +40,7 @@ export default function GlobalError({
             className="mt-8 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
-            Перезагрузить страницу
+            Reload page
           </button>
         </div>
       </body>

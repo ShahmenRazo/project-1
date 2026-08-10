@@ -51,7 +51,7 @@ export function NotificationBell() {
       setNotifications(data.notifications);
       setCount(data.unread_count);
     } catch {
-      // сеть/сервер недоступны — оставляем предыдущее состояние
+      // network/server unavailable — keep previous state
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ export function NotificationBell() {
           variant="ghost"
           size="icon"
           className="relative"
-          aria-label="Уведомления"
+          aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
           {count > 0 && (
@@ -83,10 +83,10 @@ export function NotificationBell() {
 
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex items-center justify-between">
-          Уведомления
+          Notifications
           {count > 0 && (
             <Badge variant="secondary" className="text-xs">
-              {count} новых
+              {count} new
             </Badge>
           )}
         </DropdownMenuLabel>
@@ -97,7 +97,7 @@ export function NotificationBell() {
             <NotificationListSkeleton />
           ) : notifications.length === 0 ? (
             <p className="p-4 text-center text-sm text-muted-foreground">
-              Пока нет уведомлений
+              No notifications yet
             </p>
           ) : (
             notifications.map((n, i) => {

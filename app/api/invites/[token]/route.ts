@@ -125,7 +125,7 @@ export async function POST(
     if ((count ?? 0) + 1 > limits.max_group_members) {
       throw new ApiError(
         402,
-        `На тарифе Free в группе может быть максимум ${limits.max_group_members} человека. Перейдите на Pro`,
+        `On the Free plan a group can have at most ${limits.max_group_members} people. Upgrade to Pro`,
         "UPGRADE_REQUIRED"
       );
     }
@@ -190,8 +190,8 @@ export async function POST(
       "system",
       `${creatorName} joined group "${group.name}"`,
       {
-        title: "SubSplit: новый участник",
-        body: `${user.email} присоединился к группе «${group.name}»`,
+        title: "SubSplit: new member",
+        body: `${user.email} joined the group "${group.name}"`,
         url: `/groups/${group.id}`,
       }
     );

@@ -12,14 +12,14 @@ export const CATEGORIES: SubscriptionCategory[] = [
 ];
 
 export const CATEGORY_LABELS: Record<SubscriptionCategory, string> = {
-  streaming: "Стриминг",
-  music: "Музыка",
-  productivity: "Продуктивность",
-  gaming: "Игры",
+  streaming: "Streaming",
+  music: "Music",
+  productivity: "Productivity",
+  gaming: "Gaming",
   vpn: "VPN",
   ai: "AI",
-  storage: "Хранилище",
-  other: "Другое",
+  storage: "Storage",
+  other: "Other",
 };
 
 export const CURRENCIES = [

@@ -110,14 +110,14 @@ export function GroupView({
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось отметить оплату");
+        toast.error(json?.error?.message ?? "Failed to mark as paid");
         return;
       }
 
-      toast.success("Долг оплачен");
+      toast.success("Debt marked as paid");
       router.refresh();
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setPayingIds((prev) => {
         const next = new Set(prev);
@@ -140,15 +140,15 @@ export function GroupView({
             {subscription ? (
               <>
                 {subscription.name} · {formatMoney(subscription.price, subscription.currency)}{" "}
-                {subscription.billing_cycle === "yearly" ? "/год" : "/мес"}
+                {subscription.billing_cycle === "yearly" ? "/yr" : "/mo"}
                 {subscription.billing_cycle === "yearly" && (
                   <span className="text-xs">
-                    (~{formatMoney(totalMonthly, currency)}/мес)
+                    (~{formatMoney(totalMonthly, currency)}/mo)
                   </span>
                 )}
               </>
             ) : (
-              "Без подписки"
+              "No subscription"
             )}
           </p>
         </div>
@@ -168,11 +168,11 @@ export function GroupView({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Участники</CardTitle>
+          <CardTitle className="text-base">Members</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Пока нет участников</p>
+            <p className="text-sm text-muted-foreground">No members yet</p>
           ) : (
             members.map((m) => {
               const owes = debtByUserId.get(m.user_id) ?? 0;
@@ -191,13 +191,13 @@ export function GroupView({
                       {m.name}
                       {m.is_creator && (
                         <Badge variant="secondary" className="text-[10px]">
-                          создатель
+                          creator
                         </Badge>
                       )}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Доля {m.share_percent}% ·{" "}
-                      {m.payment_status === "paid" ? "всё оплачено" : "есть долг"}
+                      Share {m.share_percent}% ·{" "}
+                      {m.payment_status === "paid" ? "all paid" : "owes"}
                     </p>
                   </div>
 
@@ -205,7 +205,7 @@ export function GroupView({
                     variant={owes > 0 ? "destructive" : "secondary"}
                     className="tabular-nums"
                   >
-                    {owes > 0 ? `должен ${formatMoney(owes, currency)}` : "чист"}
+                    {owes > 0 ? `owes ${formatMoney(owes, currency)}` : "settled"}
                   </Badge>
                 </div>
               );
@@ -217,7 +217,7 @@ export function GroupView({
       {myDebts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Ваши долги</CardTitle>
+            <CardTitle className="text-base">Your debts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {myDebts.map((p) => {
@@ -232,8 +232,8 @@ export function GroupView({
                       {formatMoney(p.amount, p.currency)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Долг за {subscription?.name ?? "подписку"} · до{" "}
-                      {new Date(p.due_date).toLocaleDateString("ru-RU")}
+                      Debt for {subscription?.name ?? "subscription"} · due{" "}
+                      {new Date(p.due_date).toLocaleDateString("en-US")}
                     </p>
                   </div>
                   <Button
@@ -242,7 +242,7 @@ export function GroupView({
                     disabled={paying}
                   >
                     <CheckCircle2 className="h-4 w-4" />
-                    {paying ? "Сохраняем…" : "Отметить оплаченным"}
+                    {paying ? "Saving…" : "Mark as paid"}
                   </Button>
                 </div>
               );
@@ -258,7 +258,7 @@ export function GroupView({
           <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
             <UserX className="h-6 w-6 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              Все долги оплачены — отличная работа!
+              All debts settled — great job!
             </p>
           </CardContent>
         </Card>

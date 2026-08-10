@@ -45,14 +45,14 @@ export default async function InvitePage({
             <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
               <AlertTriangle className="h-8 w-8 text-muted-foreground" />
               <div>
-                <p className="font-medium">Приглашение недействительно</p>
+                <p className="font-medium">Invalid invitation</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Ссылка устарела, истекла или уже была использована. Попросите
-                  создателя группы отправить новое приглашение.
+                  The link is outdated, expired, or already used. Ask the
+                  group creator to send a new invitation.
                 </p>
               </div>
               <Button asChild>
-                <Link href="/">На главную</Link>
+                <Link href="/">Home</Link>
               </Button>
             </CardContent>
           </Card>
@@ -66,7 +66,7 @@ export default async function InvitePage({
   const creator = group.users;
   const creatorName =
     creator?.display_name ??
-    (creator?.email ? creator.email.split("@")[0] : "Пользователь");
+    (creator?.email ? creator.email.split("@")[0] : "User");
 
   const amount = subscription
     ? roundMoney(
@@ -91,9 +91,9 @@ export default async function InvitePage({
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-xl">Вас пригласили в группу</CardTitle>
+            <CardTitle className="text-xl">You were invited to a group</CardTitle>
             <CardDescription>
-              {creatorName} делится с вами подпиской через SubSplit.
+              {creatorName} is sharing a subscription with you on SubSplit.
             </CardDescription>
           </CardHeader>
 
@@ -102,7 +102,7 @@ export default async function InvitePage({
               <div className="flex items-center justify-between gap-4 rounded-lg border p-3 text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Users className="h-4 w-4" />
-                  Группа
+                  Group
                 </span>
                 <span className="font-medium">{group.name}</span>
               </div>
@@ -111,7 +111,7 @@ export default async function InvitePage({
                 <div className="flex items-center justify-between gap-4 rounded-lg border p-3 text-sm">
                   <span className="flex items-center gap-2 text-muted-foreground">
                     <CreditCard className="h-4 w-4" />
-                    Подписка
+                    Subscription
                   </span>
                   <span className="font-medium">
                     {subscription.name} ·{" "}
@@ -123,7 +123,7 @@ export default async function InvitePage({
               <div className="flex items-center justify-between gap-4 rounded-lg border p-3 text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <ShieldCheck className="h-4 w-4" />
-                  Ваша доля
+                  Your share
                 </span>
                 <span className="font-medium">{invite.share_percent}%</span>
               </div>
@@ -131,7 +131,7 @@ export default async function InvitePage({
               {amount !== null && (
                 <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/40 p-3 text-sm">
                   <span className="text-muted-foreground">
-                    К оплате ({subscription!.billing_cycle === "yearly" ? "в год" : "в месяц"})
+                    To pay ({subscription!.billing_cycle === "yearly" ? "per year" : "per month"})
                   </span>
                   <span className="text-lg font-semibold tabular-nums">
                     {formatMoney(amount, subscription!.currency)}
@@ -142,15 +142,15 @@ export default async function InvitePage({
               <div className="flex items-center justify-between gap-4 rounded-lg border p-3 text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <CalendarClock className="h-4 w-4" />
-                  Приглашение действует
+                  Invitation valid
                 </span>
-                <span className="font-medium">до {expiresLabel}</span>
+                <span className="font-medium">until {expiresLabel}</span>
               </div>
 
               <div className="flex items-center justify-between gap-4 rounded-lg border p-3 text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" />
-                  Приглашённый email
+                  Invited email
                 </span>
                 <span className="font-medium">{invite.email}</span>
               </div>
@@ -160,18 +160,18 @@ export default async function InvitePage({
               <div className="flex flex-col items-center gap-3">
                 <AcceptInviteButton token={invite.token} />
                 <p className="text-xs text-muted-foreground">
-                  Вы вошли как {user.email}
+                  Signed in as {user.email}
                 </p>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <Button asChild size="lg" className="w-full sm:w-auto">
                   <Link href={`/login?next=/invite/${invite.token}`}>
-                    Зарегистрироваться и принять
+                    Sign up and accept
                   </Link>
                 </Button>
                 <p className="text-xs text-muted-foreground">
-                  После входа вы сможете принять приглашение
+                  You can accept the invitation after signing in
                 </p>
               </div>
             )}
@@ -191,7 +191,7 @@ function PublicHeader() {
           SubSplit
         </Link>
         <Button asChild variant="outline" size="sm">
-          <Link href="/login">Войти</Link>
+          <Link href="/login">Sign in</Link>
         </Button>
       </div>
     </header>

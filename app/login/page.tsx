@@ -39,7 +39,7 @@ export default async function LoginPage({
             href="/pricing"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
-            Тарифы
+            Pricing
           </Link>
         </div>
       </header>
@@ -47,16 +47,16 @@ export default async function LoginPage({
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <Card className="w-full max-w-sm">
           <CardHeader>
-            <CardTitle className="text-xl">Вход в SubSplit</CardTitle>
+            <CardTitle className="text-xl">Sign in to SubSplit</CardTitle>
             <CardDescription>
-              Делите подписки с друзьями — считаем доли автоматически.
+              Split subscriptions with friends — shares are calculated automatically.
             </CardDescription>
           </CardHeader>
           <CardContent>
             {authError && (
               <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                Не удалось войти через внешний провайдер. Попробуйте ещё раз или
-                войдите через email.
+                Failed to sign in with an external provider. Try again or
+                sign in with email.
               </p>
             )}
             <LoginForm />

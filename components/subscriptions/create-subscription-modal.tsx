@@ -89,16 +89,16 @@ export function CreateSubscriptionModal() {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось создать подписку");
+        toast.error(json?.error?.message ?? "Failed to create subscription");
         return;
       }
 
-      toast.success("Подписка добавлена");
+      toast.success("Subscription added");
       reset();
       setOpen(false);
       router.refresh();
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setSaving(false);
     }
@@ -115,21 +115,21 @@ export function CreateSubscriptionModal() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4" />
-          Добавить подписку
+          Add subscription
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Новая подписка</DialogTitle>
+          <DialogTitle>New subscription</DialogTitle>
           <DialogDescription>
-            Netflix, Spotify, ChatGPT — что угодно, что вы делите с друзьями.
+            Netflix, Spotify, ChatGPT — anything you share with friends.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Название</Label>
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               placeholder="Netflix"
@@ -143,7 +143,7 @@ export function CreateSubscriptionModal() {
           </div>
 
           <div className="space-y-2">
-            <Label>Категория</Label>
+            <Label>Category</Label>
             <Select
               value={form.category}
               onValueChange={(v) =>
@@ -165,7 +165,7 @@ export function CreateSubscriptionModal() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Цена</Label>
+              <Label htmlFor="price">Price</Label>
               <Input
                 id="price"
                 type="number"
@@ -183,7 +183,7 @@ export function CreateSubscriptionModal() {
             </div>
 
             <div className="space-y-2">
-              <Label>Валюта</Label>
+              <Label>Currency</Label>
               <Select
                 value={form.currency}
                 onValueChange={(v) => set("currency", v)}
@@ -204,7 +204,7 @@ export function CreateSubscriptionModal() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Период оплаты</Label>
+              <Label>Billing period</Label>
               <Select
                 value={form.billing_cycle}
                 onValueChange={(v) =>
@@ -215,14 +215,14 @@ export function CreateSubscriptionModal() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly">Каждый месяц</SelectItem>
-                  <SelectItem value="yearly">Раз в год</SelectItem>
+                  <SelectItem value="monthly">Every month</SelectItem>
+                  <SelectItem value="yearly">Once a year</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>День списания</Label>
+              <Label>Billing day</Label>
               <Select
                 value={form.billing_day}
                 onValueChange={(v) => set("billing_day", v)}
@@ -233,7 +233,7 @@ export function CreateSubscriptionModal() {
                 <SelectContent>
                   {BILLING_DAYS.map((d) => (
                     <SelectItem key={d} value={String(d)}>
-                      {d} число
+                      day {d}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -243,7 +243,7 @@ export function CreateSubscriptionModal() {
 
           <DialogFooter className="pt-2">
             <Button type="submit" disabled={saving}>
-              {saving ? "Сохранение…" : "Создать"}
+              {saving ? "Saving…" : "Create"}
             </Button>
           </DialogFooter>
         </form>

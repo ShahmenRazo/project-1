@@ -28,9 +28,9 @@ export function GroupsSection({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Мои группы</h2>
+          <h2 className="text-lg font-semibold tracking-tight">My groups</h2>
           <p className="text-sm text-muted-foreground">
-            Делите подписки и следите за долгами
+            Split subscriptions and keep track of balances
           </p>
         </div>
         <CreateGroupModal />
@@ -56,9 +56,9 @@ export function GroupsSection({
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
             <Users className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="font-medium">Пока нет групп</p>
+              <p className="font-medium">No groups yet</p>
               <p className="text-sm text-muted-foreground">
-                Создайте группу и добавьте друзей, чтобы делить подписку
+                Create a group and add friends to split a subscription
               </p>
             </div>
             <CreateGroupModal />
@@ -71,10 +71,10 @@ export function GroupsSection({
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base">{g.name}</CardTitle>
-                  <Badge variant="secondary">{g.member_count} уч.</Badge>
+                  <Badge variant="secondary">{g.member_count} members</Badge>
                 </div>
                 <CardDescription className="truncate">
-                  {g.subscription_name ?? "Общая подписка"}
+                  {g.subscription_name ?? "Shared subscription"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col gap-3">
@@ -83,7 +83,7 @@ export function GroupsSection({
                     <p className="flex items-center justify-between gap-2">
                       <span className="flex items-center gap-1.5 text-muted-foreground">
                         <TrendingUp className="h-4 w-4 text-destructive" />
-                        Вы должны
+                        You owe
                       </span>
                       <span className="font-semibold tabular-nums text-destructive">
                         {formatMoney(roundMoney(g.owed_by_me), g.currency)}
@@ -94,7 +94,7 @@ export function GroupsSection({
                     <p className="flex items-center justify-between gap-2">
                       <span className="flex items-center gap-1.5 text-muted-foreground">
                         <TrendingDown className="h-4 w-4 text-emerald-600" />
-                        Вам должны
+                        Owed to you
                       </span>
                       <span className="font-semibold tabular-nums text-emerald-600">
                         {formatMoney(roundMoney(g.owed_to_me), g.currency)}
@@ -104,16 +104,16 @@ export function GroupsSection({
                   {g.owed_by_me === 0 && g.owed_to_me === 0 && (
                     <p className="flex items-center gap-1.5 text-muted-foreground">
                       <Minus className="h-4 w-4" />
-                      Долгов нет
+                      No balances
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Ваша доля: {g.my_share_percent}%
+                    Your share: {g.my_share_percent}%
                   </p>
                 </div>
                 <Button asChild variant="outline" size="sm" className="mt-auto">
                   <Link href={`/groups/${g.id}`}>
-                    Открыть группу
+                    Open group
                     <ArrowRight className="ml-auto h-4 w-4" />
                   </Link>
                 </Button>

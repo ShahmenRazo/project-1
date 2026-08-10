@@ -64,7 +64,7 @@ export function DashboardShell({
         description: body,
         action: url
           ? {
-              label: "Открыть",
+              label: "Open",
               onClick: () => {
                 window.location.href = url;
               },
@@ -82,7 +82,7 @@ export function DashboardShell({
   const atSubscriptionLimit =
     isFree && subscriptions.length >= LIMITS.free.max_subscriptions;
   const AddSubscriptionControl = atSubscriptionLimit ? (
-    <UpsellModal feature="добавление 4-й подписки" />
+    <UpsellModal feature="adding a 4th subscription" />
   ) : (
     <CreateSubscriptionModal />
   );
@@ -92,17 +92,17 @@ export function DashboardShell({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Привет, {profile.display_name ?? profile.email.split("@")[0]}!
+            Hi, {profile.display_name ?? profile.email.split("@")[0]}!
           </h1>
           <p className="text-sm text-muted-foreground">
-            Управляйте подписками и делите расходы с друзьями
+            Manage subscriptions and split costs with friends
           </p>
           {isFree && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Free-тариф: {subscriptions.length}/{LIMITS.free.max_subscriptions}{" "}
-              подписок ·{" "}
+              Free plan: {subscriptions.length}/{LIMITS.free.max_subscriptions}{" "}
+              subscriptions ·{" "}
               <a href="/pricing" className="underline underline-offset-2">
-                Перейти на Pro
+                Go Pro
               </a>
             </p>
           )}
@@ -114,7 +114,7 @@ export function DashboardShell({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Расходы в месяц
+              Monthly spending
             </CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -123,7 +123,7 @@ export function DashboardShell({
               {formatMoney(totalPerMonth, "USD")}
             </p>
             <p className="text-xs text-muted-foreground">
-              {subscriptions.length} подписок на учёте
+              {subscriptions.length} subscriptions tracked
             </p>
           </CardContent>
         </Card>
@@ -131,14 +131,14 @@ export function DashboardShell({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Ближайшие списания
+              Next billings
             </CardTitle>
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {nextBillings.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Добавьте первую подписку
+                Add your first subscription
               </p>
             ) : (
               <ul className="space-y-1">
@@ -150,7 +150,7 @@ export function DashboardShell({
                     <span className="truncate">
                       {s.name}{" "}
                       <span className="text-muted-foreground">
-                        · {s.billing_day} числа
+                        · day {s.billing_day}
                       </span>
                     </span>
                     <span className="tabular-nums">
@@ -169,10 +169,10 @@ export function DashboardShell({
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <Wallet className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="font-medium">Пока нет подписок</p>
+              <p className="font-medium">No subscriptions yet</p>
               <p className="text-sm text-muted-foreground">
-                Добавьте Netflix, Spotify или другую подписку, чтобы начать
-                делиться с друзьями
+                Add Netflix, Spotify, or any other subscription to start
+                splitting with friends
               </p>
             </div>
             <CreateSubscriptionModal />
@@ -191,9 +191,9 @@ export function DashboardShell({
                     <Badge variant={hasGroup ? "default" : "secondary"}>
                       {hasGroup
                         ? isSharedCreator
-                          ? "Общая"
-                          : "Участник"
-                        : "Личная"}
+                          ? "Shared"
+                          : "Member"
+                        : "Personal"}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -207,9 +207,9 @@ export function DashboardShell({
                     </span>
                     {sub.billing_cycle === "yearly" && (
                       <span className="text-xs text-muted-foreground">
-                        /год (
+                        /year (
                         {formatMoney(monthlyPrice(sub), sub.currency)}
-                        /мес)
+                        /mo)
                       </span>
                     )}
                   </div>
@@ -217,9 +217,9 @@ export function DashboardShell({
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Repeat className="h-3.5 w-3.5" />
                     {sub.billing_cycle === "monthly"
-                      ? "Ежемесячно"
-                      : "Ежегодно"}
-                    , списание {sub.billing_day} числа
+                      ? "Monthly"
+                      : "Yearly"}
+                    , billed on day {sub.billing_day}
                   </div>
 
                   {hasGroup && (

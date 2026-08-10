@@ -25,15 +25,15 @@ export async function generateMetadata({
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://kitstartai.com";
   return {
     title: info?.valid
-      ? `Присоединиться к «${info.group_name}»`
-      : "Ссылка-приглашение",
+      ? `Join "${info.group_name}"`
+      : "Group invite",
     description: info?.valid
-      ? `Делите подписку ${info.subscription?.name ?? ""} с друзьями на SubSplit — от ${formatMoney(info.share_monthly, info.currency)}/мес`
+      ? `Split ${info.subscription?.name ?? ""} with friends on SubSplit — from ${formatMoney(info.share_monthly, info.currency)}/mo`
       : undefined,
     openGraph: info?.valid
       ? {
-          title: `Присоединиться к «${info.group_name}»`,
-          description: `Делите подписку на SubSplit — от ${formatMoney(info.share_monthly, info.currency)}/мес`,
+          title: `Join "${info.group_name}"`,
+          description: `Split a subscription on SubSplit — from ${formatMoney(info.share_monthly, info.currency)}/mo`,
           images: [{ url: `/api/og?group=${info.group_id}`, width: 1200, height: 630 }],
           url: `${base}/join/${params.token}`,
         }
@@ -65,7 +65,7 @@ export default async function JoinPage({
             SubSplit
           </Link>
           <Button asChild variant="outline" size="sm">
-            <Link href="/login">Войти</Link>
+            <Link href="/login">Sign in</Link>
           </Button>
         </div>
       </header>
@@ -76,19 +76,19 @@ export default async function JoinPage({
             <>
               <CardHeader>
                 <CardTitle className="text-xl">
-                  Ссылка недействительна
+                  Invalid link
                 </CardTitle>
                 <CardDescription>
                   {info?.reason === "expired"
-                    ? "Срок действия ссылки истёк."
+                    ? "This link has expired."
                     : info?.reason === "uses_exhausted"
-                      ? "Лимит использований ссылки исчерпан."
-                      : "Приглашение не найдено или было удалено."}
+                      ? "This link has reached its usage limit."
+                      : "Invitation not found or has been removed."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild className="w-full">
-                  <Link href="/">На главную</Link>
+                  <Link href="/">Home</Link>
                 </Button>
               </CardContent>
             </>
@@ -96,12 +96,12 @@ export default async function JoinPage({
             <>
               <CardHeader>
                 <CardTitle className="text-xl">
-                  Присоединиться к группе
+                  Join group
                 </CardTitle>
                 <CardDescription>
                   {info.creator_id === user?.id
-                    ? "Это ваша группа — вы уже в ней."
-                    : "Вас приглашают делить подписку через SubSplit."}
+                    ? "This is your group — you are already in it."
+                    : "You've been invited to split a subscription on SubSplit."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -110,20 +110,20 @@ export default async function JoinPage({
                   <p className="text-sm text-muted-foreground">
                     {info.subscription
                       ? `${info.subscription.name} · ${formatMoney(info.subscription.price, info.subscription.currency)}${
-                          info.subscription.billing_cycle === "yearly" ? "/год" : "/мес"
+                          info.subscription.billing_cycle === "yearly" ? "/yr" : "/mo"
                         }`
-                      : "Без подписки"}
+                      : "No subscription"}
                   </p>
                   <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />
                     {info.member_count}{" "}
-                    {info.member_count === 1 ? "участник" : "участников"} уже в группе
+                    {info.member_count === 1 ? "member" : "members"} already in the group
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between rounded-lg bg-muted/60 px-4 py-3">
                   <span className="text-sm text-muted-foreground">
-                    Ваша доля
+                    Your share
                   </span>
                   <span className="font-semibold tabular-nums">
                     {info.share_percent}%
@@ -133,8 +133,8 @@ export default async function JoinPage({
                 <div className="flex items-center justify-between rounded-lg bg-muted/60 px-4 py-3">
                   <span className="text-sm text-muted-foreground">
                     {info.subscription
-                      ? `Около ${formatMoney(info.share_monthly, info.currency)}/мес`
-                      : "Цена доли"}
+                      ? `About ${formatMoney(info.share_monthly, info.currency)}/mo`
+                      : "Share price"}
                   </span>
                   <span className="font-semibold tabular-nums">
                     {info.share_monthly > 0
@@ -145,8 +145,8 @@ export default async function JoinPage({
 
                 {info.full && (
                   <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                    Группа заполнена — создателю нужно перейти на Pro, чтобы
-                    добавить ещё участников.
+                    The group is full — the creator needs to upgrade to Pro to
+                    add more members.
                   </p>
                 )}
 
@@ -155,7 +155,7 @@ export default async function JoinPage({
                 ) : (
                   <Button asChild className="w-full">
                     <Link href={`/login?next=/join/${info.token}`}>
-                      Зарегистрироваться и присоединиться
+                      Sign up and join
                     </Link>
                   </Button>
                 )}

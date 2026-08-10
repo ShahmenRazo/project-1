@@ -72,14 +72,14 @@ export function PublicInviteDialog({
         error?: { message?: string };
       } | null;
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось создать ссылку");
+        toast.error(json?.error?.message ?? "Failed to create link");
         return;
       }
       await loadInvite();
-      toast.success("Ссылка создана");
+      toast.success("Link created");
       trackEvent("invite_sent", { method: "public_link" });
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setLoading(false);
     }
@@ -90,10 +90,10 @@ export function PublicInviteDialog({
     try {
       await navigator.clipboard.writeText(`${window.location.origin}${invite.url}`);
       setCopied(true);
-      toast.success("Ссылка скопирована");
+      toast.success("Link copied");
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Не удалось скопировать");
+      toast.error("Failed to copy");
     }
   }
 
@@ -157,15 +157,15 @@ export function PublicInviteDialog({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Link2 className="mr-2 h-4 w-4" />
-          Публичная ссылка
+          Public link
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Публичная ссылка</DialogTitle>
+          <DialogTitle>Public link</DialogTitle>
           <DialogDescription>
-            Любой, у кого есть ссылка, сможет присоединиться к группе и
-            получить свободную долю подписки.
+            Anyone with the link can join the group and get the
+            free share of the subscription.
           </DialogDescription>
         </DialogHeader>
 
@@ -187,22 +187,22 @@ export function PublicInviteDialog({
             </div>
             {invite.max_uses > 0 && (
               <p className="text-xs text-muted-foreground">
-                Использовано {invite.uses_count} из {invite.max_uses}
+                Used {invite.uses_count} of {invite.max_uses}
               </p>
             )}
             {shareButtons(`${window.location.origin}${invite.url}`)}
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            У этой группы пока нет публичной ссылки. Создайте её, чтобы
-            приглашать друзей.
+            This group has no public link yet. Create one to
+            invite friends.
           </p>
         )}
 
         <DialogFooter>
           {!invite && (
             <Button onClick={createInvite} disabled={loading}>
-              {loading ? "Создание…" : "Создать ссылку"}
+              {loading ? "Creating…" : "Create link"}
             </Button>
           )}
         </DialogFooter>

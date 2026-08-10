@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if ((count ?? 0) >= limits.max_subscriptions) {
       throw new ApiError(
         402,
-        "Достигнут лимит подписок бесплатного тарифа. Перейдите на Pro",
+        "You've reached the free plan subscription limit. Upgrade to Pro",
         "UPGRADE_REQUIRED"
       );
     }

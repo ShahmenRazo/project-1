@@ -34,14 +34,14 @@ export async function sendInviteEmail({
   const { error } = await resend.emails.send({
     from: RESEND_FROM,
     to: [to],
-    subject: `Вас пригласили в группу «${groupName}» на SubSplit`,
+    subject: `You've been invited to join "${groupName}" on SubSplit`,
     html: inviteEmailHtml({
       groupName,
       subscriptionName,
       sharePercent,
       inviteLink,
     }),
-    text: `Вас пригласили в группу ${groupName} для ${subscriptionName}. Присоединяйтесь: ${inviteLink}`,
+    text: `You've been invited to the group ${groupName} for ${subscriptionName}. Join here: ${inviteLink}`,
   });
 
   if (error) {
@@ -64,7 +64,7 @@ function inviteEmailHtml({
 }): string {
   const rounded = Math.round(sharePercent * 100) / 100;
   return `<!doctype html>
-<html lang="ru">
+<html lang="en">
   <body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:32px 16px;">
       <tr>
@@ -74,7 +74,7 @@ function inviteEmailHtml({
               <td style="padding:32px 32px 8px;">
                 <p style="margin:0;font-size:14px;color:#71717a;">SubSplit</p>
                 <h1 style="margin:8px 0 0;font-size:22px;color:#18181b;line-height:1.3;">
-                  Вас пригласили в группу<br/>«${groupName}»
+                  You've been invited to join<br/>"${groupName}"
                 </h1>
               </td>
             </tr>
@@ -83,19 +83,19 @@ function inviteEmailHtml({
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa;border:1px solid #e4e4e7;border-radius:8px;">
                   <tr>
                     <td style="padding:16px;font-size:14px;color:#3f3f46;line-height:1.6;">
-                      Ваш друг делит с вами подписку<br/>
+                      A friend is sharing a subscription with you<br/>
                       <strong style="color:#18181b;">${subscriptionName}</strong><br/><br/>
-                      Ваша доля: <strong style="color:#18181b;">${rounded}%</strong> — вы платите только свою часть.
+                      Your share: <strong style="color:#18181b;">${rounded}%</strong> — you pay only your part.
                     </td>
                   </tr>
                 </table>
                 <div style="text-align:center;margin-top:24px;">
                   <a href="${inviteLink}" style="display:inline-block;background-color:#18181b;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 28px;border-radius:8px;">
-                    Присоединиться к группе
+                    Join the group
                   </a>
                 </div>
                 <p style="margin:20px 0 0;font-size:12px;color:#a1a1aa;text-align:center;word-break:break-all;">
-                  Если кнопка не работает, откройте ссылку:<br/>
+                  If the button doesn't work, open this link:<br/>
                   <a href="${inviteLink}" style="color:#71717a;">${inviteLink}</a>
                 </p>
               </td>

@@ -74,9 +74,9 @@ export async function PUT(
       counterpart?.email.split("@")[0] ??
       "User";
 
-    const message = `${name} подтвердил(а) оплату ${payment.amount} ${payment.currency}`;
+    const message = `${name} confirmed payment of ${payment.amount} ${payment.currency}`;
     await notifyUser(counterpartId, "payment_paid", message, {
-      title: "SubSplit: долг оплачен",
+      title: "SubSplit: debt paid",
       body: message,
       url: payment.group_id ? `/groups/${payment.group_id}` : "/",
     });

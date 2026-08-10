@@ -64,7 +64,7 @@ export function BalanceCalculator({
         <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
           <Info className="h-6 w-6 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            В этой группе нет активных долгов
+            No active debts in this group
           </p>
         </CardContent>
       </Card>
@@ -78,18 +78,18 @@ export function BalanceCalculator({
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Sparkles className="h-4 w-4 text-primary" />
-          Оптимальные переводы
+          Optimal transfers
         </CardTitle>
         <span className="text-xs text-muted-foreground">
           {naiveCount > transferCount
-            ? `${naiveCount} → ${transferCount} переводов`
+            ? `${naiveCount} → ${transferCount} transfers`
             : `${transferCount} ${plural(transferCount)}`}
         </span>
       </CardHeader>
       <CardContent className="space-y-3">
         {settlements.map((s, i) => {
-          const from = nameById.get(s.from_user_id) ?? "Кто-то";
-          const to = nameById.get(s.to_user_id) ?? "Кто-то";
+          const from = nameById.get(s.from_user_id) ?? "Someone";
+          const to = nameById.get(s.to_user_id) ?? "Someone";
           return (
             <div
               key={i}
@@ -114,8 +114,5 @@ export function BalanceCalculator({
 }
 
 function plural(n: number): string {
-  if (n % 10 === 1 && n % 100 !== 11) return "перевод";
-  if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14))
-    return "перевода";
-  return "переводов";
+  return n === 1 ? "transfer" : "transfers";
 }

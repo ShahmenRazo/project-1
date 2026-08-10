@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     if (!user.email) {
       throw new ApiError(
         400,
-      "Для оплаты нужен email (войдите через email или Google)",
+      "An email is required to pay (sign in with email or Google)",
         "NO_EMAIL"
       );
     }

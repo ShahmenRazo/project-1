@@ -2,17 +2,17 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SubSplit — делите подписки с друзьями",
+    name: "SubSplit — split subscriptions with friends",
     short_name: "SubSplit",
     description:
-      "Сервис для совместной оплаты подписок: расчёт долей, напоминания и push-уведомления.",
+      "Share subscription costs with friends: split calculations, reminders and push notifications.",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#ffffff",
     theme_color: "#18181b",
-    lang: "ru",
+    lang: "en",
     icons: [
       {
         src: "/icons/icon-192.png",

@@ -58,8 +58,8 @@ export async function GET(request: NextRequest) {
         total: 0,
         currency: p.currency,
         groupId: group?.id ?? "",
-        groupName: group?.name ?? "группе",
-        subName: group?.subscriptions?.name ?? "подписке",
+        groupName: group?.name ?? "group",
+        subName: group?.subscriptions?.name ?? "subscription",
       };
     entry.ids.push(p.id);
     entry.total = roundMoney(entry.total + p.amount);
@@ -72,13 +72,13 @@ export async function GET(request: NextRequest) {
   const remindedIds: string[] = [];
 
   for (const [userId, entry] of byUser) {
-    const message = `Напоминание: у вас долг ${formatMoney(
+    const message = `Reminder: you owe ${formatMoney(
       entry.total,
       entry.currency
-    )} в группе «${entry.groupName}» (${entry.subName})`;
+    )} in group "${entry.groupName}" (${entry.subName})`;
 
     await notifyUser(userId, "reminder", message, {
-      title: "SubSplit: напоминание о долге",
+      title: "SubSplit: debt reminder",
       body: message,
       url: entry.groupId ? `/groups/${entry.groupId}` : "/",
     });

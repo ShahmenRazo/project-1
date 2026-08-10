@@ -19,7 +19,7 @@ export function useCheckout() {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось создать оформление");
+        toast.error(json?.error?.message ?? "Failed to start checkout");
         return;
       }
 
@@ -27,10 +27,10 @@ export function useCheckout() {
       if (url) {
         window.location.href = url;
       } else {
-        toast.error("Не получен URL оформления");
+        toast.error("No checkout URL received");
       }
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setLoading(false);
     }

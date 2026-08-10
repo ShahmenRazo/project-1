@@ -21,15 +21,15 @@ export function AcceptInviteButton({ token }: { token: string }) {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось принять приглашение");
+        toast.error(json?.error?.message ?? "Failed to accept invitation");
         return;
       }
 
-      toast.success("Приглашение принято! Добро пожаловать в группу");
+      toast.success("Invitation accepted! Welcome to the group");
       router.push(`/groups/${json?.data?.group_id ?? ""}`);
       router.refresh();
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ export function AcceptInviteButton({ token }: { token: string }) {
   return (
     <Button size="lg" onClick={accept} disabled={loading} className="w-full sm:w-auto">
       <CheckCircle2 className="h-4 w-4" />
-      {loading ? "Принятие…" : "Принять приглашение"}
+      {loading ? "Accepting…" : "Accept invitation"}
     </Button>
   );
 }

@@ -21,10 +21,10 @@ export function GroupsPageContent() {
           };
           if (!cancelled) setGroups(json.data?.groups ?? []);
         } else if (!cancelled) {
-          toast.error("Не удалось загрузить группы");
+          toast.error("Failed to load groups");
         }
       } catch {
-        if (!cancelled) toast.error("Ошибка сети, обновите страницу");
+        if (!cancelled) toast.error("Network error, please refresh the page");
       } finally {
         if (!cancelled) setLoading(false);
       }

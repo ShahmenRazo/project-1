@@ -65,7 +65,7 @@ export function CreateGroupModal() {
         };
         if (!cancelled) setSubscriptions(json.data ?? []);
       } catch {
-        if (!cancelled) toast.error("Не удалось загрузить подписки");
+        if (!cancelled) toast.error("Failed to load subscriptions");
       } finally {
         if (!cancelled) setLoadingSubs(false);
       }
@@ -103,10 +103,10 @@ export function CreateGroupModal() {
 
     const nextErrors: Record<string, string> = {};
     if (!subscriptionId) {
-      nextErrors.subscription_id = "Выберите подписку";
+      nextErrors.subscription_id = "Choose a subscription";
     }
     if (!name.trim()) {
-      nextErrors.name = "Укажите название группы";
+      nextErrors.name = "Enter a group name";
     }
 
     const membersPayload: { email: string; share_percent: number }[] = [];
@@ -114,12 +114,12 @@ export function CreateGroupModal() {
     members.forEach((m, i) => {
       if (!m.email.trim() && !m.share.trim()) return;
       if (!m.email.trim() || !/^\S+@\S+\.\S+$/.test(m.email.trim())) {
-        nextErrors[`members.${i}.email`] = "Некорректный email";
+        nextErrors[`members.${i}.email`] = "Invalid email";
         return;
       }
       const share = Number(m.share);
       if (!Number.isFinite(share) || share <= 0) {
-        nextErrors[`members.${i}.share`] = "Укажите долю больше 0";
+        nextErrors[`members.${i}.share`] = "Enter a share greater than 0";
         return;
       }
       membersPayload.push({
@@ -130,7 +130,7 @@ export function CreateGroupModal() {
     });
 
     if (shareSum >= 100) {
-      nextErrors.share_sum = `Сумма долей участников должна быть меньше 100% (сейчас ${shareSum}%)`;
+      nextErrors.share_sum = `Members' shares must total less than 100% (currently ${shareSum}%)`;
     }
 
     if (Object.keys(nextErrors).length > 0) {
@@ -154,17 +154,17 @@ export function CreateGroupModal() {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось создать группу");
+        toast.error(json?.error?.message ?? "Failed to create group");
         return;
       }
 
-      toast.success("Группа создана, участникам отправлены уведомления");
+      toast.success("Group created, notifications sent to members");
       trackEvent("create_group", { group_name: name.trim() });
       reset();
       setOpen(false);
       router.refresh();
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setSaving(false);
     }
@@ -183,26 +183,26 @@ export function CreateGroupModal() {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Users className="h-4 w-4" />
-          Создать группу
+          Create group
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Новая группа</DialogTitle>
+          <DialogTitle>New group</DialogTitle>
           <DialogDescription>
-            Разделите подписку с друзьями: укажите их email и долю оплаты.
+            Split a subscription with friends: add their email and share.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Подписка</Label>
+            <Label>Subscription</Label>
             {loadingSubs ? (
               <Skeleton className="h-9 w-full" />
             ) : subscriptions.length === 0 ? (
               <p className="rounded-md border border-dashed p-3 text-center text-xs text-muted-foreground">
-                Сначала добавьте подписку — без неё группу не создать
+                Add a subscription first — a group needs one
               </p>
             ) : (
               <Select
@@ -210,7 +210,7 @@ export function CreateGroupModal() {
                 onValueChange={(v) => setSubscriptionId(v)}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Выберите подписку" />
+                  <SelectValue placeholder="Choose a subscription" />
                 </SelectTrigger>
                 <SelectContent>
                   {subscriptions.map((s) => (
@@ -227,10 +227,10 @@ export function CreateGroupModal() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="group-name">Название группы</Label>
+            <Label htmlFor="group-name">Group name</Label>
             <Input
               id="group-name"
-              placeholder="Семья — Netflix"
+              placeholder="Family — Netflix"
               value={name}
               onChange={(e) => setName(e.target.value)}
               aria-invalid={!!errors.name}
@@ -242,7 +242,7 @@ export function CreateGroupModal() {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Участники (email и доля)</Label>
+              <Label>Members (email and share)</Label>
               <Button
                 type="button"
                 variant="ghost"
@@ -250,7 +250,7 @@ export function CreateGroupModal() {
                 onClick={addMember}
                 disabled={members.length >= 10}
               >
-                <Plus className="h-4 w-4" /> Добавить
+                <Plus className="h-4 w-4" /> Add
               </Button>
             </div>
 
@@ -295,7 +295,7 @@ export function CreateGroupModal() {
                   className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
                   onClick={() => removeMember(i)}
                   disabled={members.length === 1}
-                  aria-label="Удалить участника"
+                  aria-label="Remove member"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -309,7 +309,7 @@ export function CreateGroupModal() {
 
           <DialogFooter className="pt-2">
             <Button type="submit" disabled={saving || loadingSubs}>
-              {saving ? "Создание…" : "Создать группу"}
+              {saving ? "Creating…" : "Create group"}
             </Button>
           </DialogFooter>
         </form>

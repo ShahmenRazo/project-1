@@ -59,12 +59,12 @@ export async function POST(
     let reminded = 0;
     for (const [userId, debt] of debts) {
       if (userId === user.id) continue;
-      const message = `Напоминание: вы должны ${formatMoney(
+      const message = `Reminder: you owe ${formatMoney(
         debt.amount,
         debt.currency
-      )} в группе "${group.name}"`;
+      )} in group "${group.name}"`;
       await notifyUser(userId, "reminder", message, {
-        title: "SubSplit: напоминание о долге",
+        title: "SubSplit: debt reminder",
         body: message,
         url: `/groups/${group.id}`,
       });

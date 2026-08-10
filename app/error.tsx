@@ -51,31 +51,31 @@ export default function GlobalErrorBoundary({
         </div>
 
         <h1 className="mt-6 text-2xl font-bold tracking-tight">
-          Что-то пошло не так
+          Something went wrong
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Произошла непредвиденная ошибка. Перезагрузите страницу — если
-          проблема повторится, сообщите нам.
+          An unexpected error occurred. Reload the page — if the
+          problem persists, let us know.
         </p>
 
         {error?.digest && (
           <p className="mt-2 font-mono text-xs text-muted-foreground">
-            Код ошибки: {error.digest}
+            Error code: {error.digest}
           </p>
         )}
 
         <div className="mt-8 flex flex-col justify-center gap-2 sm:flex-row">
           <Button onClick={() => reset()}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Перезагрузить страницу
+            Reload page
           </Button>
           <Button variant="outline" onClick={handleReport} disabled={reporting || reported}>
             <Send className="mr-2 h-4 w-4" />
             {reporting
-              ? "Отправка…"
+              ? "Sending…"
               : reported
-                ? "Спасибо, отчёт отправлен"
-                : "Сообщить о проблеме"}
+                ? "Thanks, report sent"
+                : "Report a problem"}
           </Button>
         </div>
       </div>

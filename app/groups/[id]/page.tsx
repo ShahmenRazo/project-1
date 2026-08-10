@@ -82,7 +82,7 @@ export default async function GroupPage({
     const name =
       profile?.display_name ??
       profile?.email.split("@")[0] ??
-      "Пользователь";
+      "User";
     return {
       user_id: m.user_id,
       name,

@@ -22,19 +22,19 @@ export function RemindButton({ groupId }: { groupId: string }) {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось отправить напоминания");
+        toast.error(json?.error?.message ?? "Failed to send reminders");
         return;
       }
 
       const reminded = json?.data?.reminded ?? 0;
       if (reminded === 0) {
-        toast.info("Нет должников — все уже оплатили");
+        toast.info("No debtors — everyone has paid");
       } else {
-        toast.success(`Напоминание отправлено ${reminded} участникам`);
+        toast.success(`Reminder sent to ${reminded} members`);
       }
       router.refresh();
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setLoading(false);
     }
@@ -48,7 +48,7 @@ export function RemindButton({ groupId }: { groupId: string }) {
       disabled={loading}
     >
       <Send className="h-4 w-4" />
-      {loading ? "Отправка…" : "Напомнить"}
+      {loading ? "Sending…" : "Remind"}
     </Button>
   );
 }

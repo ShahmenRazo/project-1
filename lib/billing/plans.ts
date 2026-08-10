@@ -24,10 +24,10 @@ export const FREE_PLAN = {
   currency: "USD",
   period: null,
   features: [
-    "До 3 подписок",
-    "До 2 человек в группе",
-    "Ручной ввод подписок",
-    "Базовые напоминания",
+    "Up to 3 subscriptions",
+    "Up to 2 people per group",
+    "Manual subscription entry",
+    "Basic reminders",
   ],
 };
 
@@ -36,12 +36,12 @@ export const PRO_PLAN = {
   name: "Pro",
   price: 3.99,
   currency: "USD",
-  period: "месяц",
+  period: "month",
   features: [
-    "Безлимит подписок",
-    "До 10 человек в группе",
-    "Автоимпорт подписок",
-    "Мем-напоминания",
-    "Статистика расходов",
+    "Unlimited subscriptions",
+    "Up to 10 people per group",
+    "Auto-import subscriptions",
+    "Meme reminders",
+    "Spending stats",
   ],
 };

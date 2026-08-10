@@ -36,11 +36,11 @@ export function ResetPasswordForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      if (!res.ok) throw new Error("Не удалось отправить письмо");
-      toast.success("Письмо со ссылкой отправлено. Проверьте почту");
+      if (!res.ok) throw new Error("Failed to send the email");
+      toast.success("Email with the link sent. Check your inbox");
       setEmail("");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Ошибка отправки");
+      toast.error(error instanceof Error ? error.message : "Failed to send");
     } finally {
       setLoading(false);
     }
@@ -49,11 +49,11 @@ export function ResetPasswordForm() {
   async function handleSetPassword(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 6) {
-      toast.error("Пароль должен быть не короче 6 символов");
+      toast.error("Password must be at least 6 characters");
       return;
     }
     if (password !== confirm) {
-      toast.error("Пароли не совпадают");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -77,7 +77,7 @@ export function ResetPasswordForm() {
         if (otpError) throw otpError;
       } else if (token) {
         throw new Error(
-          "Ссылка устарела — запросите сброс пароля ещё раз"
+          "Link expired — request a password reset again"
         );
       }
 
@@ -86,14 +86,14 @@ export function ResetPasswordForm() {
       });
       if (updateError) throw updateError;
 
-      toast.success("Пароль обновлён. Войдите с новым паролем");
+      toast.success("Password updated. Sign in with your new password");
       router.push("/login");
       router.refresh();
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Не удалось обновить пароль. Ссылка могла истечь"
+          : "Failed to update the password. The link may have expired"
       );
     } finally {
       setLoading(false);
@@ -104,11 +104,11 @@ export function ResetPasswordForm() {
     return (
       <form onSubmit={handleSetPassword} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="password">Новый пароль</Label>
+          <Label htmlFor="password">New password</Label>
           <Input
             id="password"
             type="password"
-            placeholder="Минимум 6 символов"
+            placeholder="At least 6 characters"
             autoComplete="new-password"
             minLength={6}
             required
@@ -118,11 +118,11 @@ export function ResetPasswordForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirm">Повторите пароль</Label>
+          <Label htmlFor="confirm">Repeat password</Label>
           <Input
             id="confirm"
             type="password"
-            placeholder="Ещё раз"
+            placeholder="Again"
             autoComplete="new-password"
             minLength={6}
             required
@@ -132,7 +132,7 @@ export function ResetPasswordForm() {
         </div>
 
         <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Сохранение…" : "Сохранить пароль"}
+          {loading ? "Saving…" : "Save password"}
         </Button>
       </form>
     );
@@ -154,7 +154,7 @@ export function ResetPasswordForm() {
       </div>
 
       <Button type="submit" disabled={loading} className="w-full">
-        {loading ? "Отправка…" : "Отправить ссылку"}
+        {loading ? "Sending…" : "Send link"}
       </Button>
     </form>
   );

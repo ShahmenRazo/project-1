@@ -32,7 +32,7 @@ export function UpsellModal({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        {trigger ?? <Button variant="outline">Добавить подписку</Button>}
+        {trigger ?? <Button variant="outline">Add subscription</Button>}
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
@@ -40,11 +40,11 @@ export function UpsellModal({
           <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
             <Crown className="h-5 w-5 text-primary" />
           </div>
-          <DialogTitle>Переходите на Pro</DialogTitle>
+          <DialogTitle>Upgrade to Pro</DialogTitle>
           <DialogDescription>
             {feature
-              ? `Возможность «${feature}» доступна только на плане Pro.`
-              : "Вы достигли лимита бесплатного тарифа."}
+              ? `"${feature}" is only available on the Pro plan.`
+              : "You've reached the limit of the free plan."}
           </DialogDescription>
         </DialogHeader>
 
@@ -67,12 +67,12 @@ export function UpsellModal({
             className="w-full"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Перейти на Pro —{" "}
-            {formatMoney(PRO_PLAN.price, PRO_PLAN.currency)}/мес
+            Upgrade to Pro —{" "}
+            {formatMoney(PRO_PLAN.price, PRO_PLAN.currency)}/mo
           </Button>
           <DialogClose asChild>
             <Button variant="ghost" className="w-full" disabled={loading}>
-              Остаться на Free
+              Stay on Free
             </Button>
           </DialogClose>
         </div>

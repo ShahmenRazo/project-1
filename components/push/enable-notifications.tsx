@@ -28,11 +28,11 @@ export function EnableNotificationsButton() {
 
     if (result.granted) {
       setGranted(true);
-      toast.success("Push-уведомления включены");
+      toast.success("Push notifications enabled");
     } else {
       setGranted(false);
       toast.error(
-        "Разрешите уведомления в настройках браузера и попробуйте снова"
+        "Allow notifications in your browser settings and try again"
       );
     }
   }
@@ -47,7 +47,7 @@ export function EnableNotificationsButton() {
       disabled={loading}
     >
       <BellRing className="h-4 w-4" />
-      {loading ? "Подключение…" : "Push-уведомления"}
+      {loading ? "Connecting…" : "Push notifications"}
     </Button>
   );
 }

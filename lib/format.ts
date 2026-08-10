@@ -7,17 +7,17 @@ export function formatMoney(amount: number, currency: string): string {
   }).format(amount);
 }
 
-/** Дата из ISO-строки: "2026-08-15" -> "15 авг." */
+/** Date from ISO string: "2026-08-15" -> "Aug 15" */
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("ru-RU", {
+  return new Date(iso).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
   });
 }
 
-/** Время/дата для уведомлений */
+/** Time/date for notifications */
 export function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("ru-RU", {
+  return new Date(iso).toLocaleString("en-US", {
     day: "numeric",
     month: "short",
     hour: "2-digit",

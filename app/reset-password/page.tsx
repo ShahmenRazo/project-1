@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 
 export const metadata: Metadata = {
-  title: "Сброс пароля",
-  description: "Восстановление доступа к аккаунту SubSplit.",
+  title: "Reset password",
+  description: "Recover access to your SubSplit account.",
 };
 
 export default function ResetPasswordPage() {
@@ -12,9 +12,9 @@ export default function ResetPasswordPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Сброс пароля</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Reset password</h1>
           <p className="text-sm text-muted-foreground">
-            Введите email, и мы отправим ссылку для восстановления доступа
+            Enter your email and we'll send you a link to recover access
           </p>
         </div>
         <Suspense fallback={null}>

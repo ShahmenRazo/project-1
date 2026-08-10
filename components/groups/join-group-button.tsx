@@ -30,14 +30,14 @@ export function JoinGroupButton({
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Не удалось присоединиться");
+        toast.error(json?.error?.message ?? "Failed to join");
         return;
       }
-      toast.success("Вы в группе! Добро пожаловать");
+      toast.success("You're in the group! Welcome");
       router.push(`/groups/${json?.data?.group_id}`);
       router.refresh();
     } catch {
-      toast.error("Ошибка сети, попробуйте ещё раз");
+      toast.error("Network error, please try again");
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,7 @@ export function JoinGroupButton({
   return (
     <Button className="w-full" onClick={handleJoin} disabled={disabled || loading}>
       <UserPlus className="mr-2 h-4 w-4" />
-      {loading ? "Присоединение…" : "Присоединиться"}
+      {loading ? "Joining…" : "Join group"}
     </Button>
   );
 }
