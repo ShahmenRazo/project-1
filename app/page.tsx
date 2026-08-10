@@ -2,36 +2,86 @@ import Link from "next/link";
 import {
   ArrowDown,
   ArrowRight,
+  BellRing,
+  Check,
   CreditCard,
   Handshake,
-  BellRing,
   ShieldCheck,
   Users,
   Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SavingsCounter } from "@/components/landing/savings-counter";
 import { SavingsCalculator } from "@/components/landing/savings-calculator";
 
 export const dynamic = "force-dynamic";
 
-const STEPS = [
-  {
-    icon: CreditCard,
-    title: "Добавьте подписку",
-    text: "Netflix, Spotify, ChatGPT — укажите цену и день списания за 30 секунд.",
+// ---------- Copy (US market) ----------
+const COPY = {
+  brand: "SubSplit",
+  header: {
+    howItWorks: "How It Works",
+    calculator: "Savings Calculator",
+    pricing: "Pricing",
+    signIn: "Sign In",
   },
-  {
-    icon: Users,
-    title: "Создайте группу",
-    text: "Пригласите друзей по email и задайте доли — например, 30/30/40.",
+  hero: {
+    headlineA: "Split subscriptions, ",
+    headlineB: "not friendships",
+    subheadline:
+      "Netflix, Spotify, ChatGPT, Xbox Game Pass — share the cost automatically. No awkward texts, no forgotten payments.",
+    ctaPrimary: "Get Started Free",
+    ctaSecondary: "See how much you'll save",
+    trust: [
+      "No credit card required",
+      "Free for 3 subscriptions",
+      "Setup in 2 minutes",
+    ],
   },
-  {
-    icon: BellRing,
-    title: "Получайте платежи",
-    text: "Мы считаем долги, шлём напоминания и показываем, кто кому должен.",
+  howItWorks: {
+    title: "How It Works",
+    subtitle: "Three steps — and you'll never pay full price alone again.",
+    stepLabel: (i: number) => `Step ${i + 1}`,
+    steps: [
+      {
+        icon: CreditCard,
+        title: "Add your subscription",
+        text: "Netflix, Spotify, ChatGPT — add price and billing date in 30 seconds.",
+      },
+      {
+        icon: Users,
+        title: "Create a group",
+        text: "Invite roommates or friends by email or link. Set shares: 30/30/40.",
+      },
+      {
+        icon: BellRing,
+        title: "Get paid back",
+        text: "We track who owes what, send reminders, and show the easiest way to settle up.",
+      },
+    ],
   },
-];
+  calculator: {
+    badge: "Savings Calculator",
+    title: "How much are you paying alone?",
+    text: "The average subscription costs $12.99 a month. Five subscriptions is already $780 a year. Split them with roommates, friends, family — and keep most of that money.",
+    points: [
+      "Fair share math down to the penny",
+      "Automatic reminders for what's owed",
+      "Monthly and yearly billing cycles",
+    ],
+  },
+  cta: {
+    title: "Stop paying for everyone. Split it fairly.",
+    text: "Create your first group in two minutes — free, no card required.",
+    button: "Start Splitting Free",
+  },
+  footer: {
+    howItWorks: "How It Works",
+    pricing: "Pricing",
+    signIn: "Sign In",
+    privacy: "Privacy Policy",
+    terms: "Terms",
+  },
+} as const;
 
 export default function LandingPage() {
   return (
@@ -40,29 +90,29 @@ export default function LandingPage() {
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <ShieldCheck className="h-5 w-5" />
-            SubSplit
+            {COPY.brand}
           </Link>
           <nav className="flex items-center gap-4 text-sm">
             <Link
               href="#how-it-works"
               className="hidden text-muted-foreground hover:text-foreground sm:block"
             >
-              Как это работает
+              {COPY.header.howItWorks}
             </Link>
             <Link
               href="#calculator"
               className="hidden text-muted-foreground hover:text-foreground sm:block"
             >
-              Калькулятор
+              {COPY.header.calculator}
             </Link>
             <Link
               href="/pricing"
               className="text-muted-foreground hover:text-foreground"
             >
-              Тарифы
+              {COPY.header.pricing}
             </Link>
             <Button asChild variant="outline" size="sm">
-              <Link href="/login">Войти</Link>
+              <Link href="/login">{COPY.header.signIn}</Link>
             </Button>
           </nav>
         </div>
@@ -74,42 +124,39 @@ export default function LandingPage() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-primary/5 to-transparent"
         />
-        <div className="mx-auto flex max-w-5xl flex-col items-center px-4 pb-20 pt-20 text-center sm:pt-28">
+        <div className="mx-auto flex max-w-5xl flex-col items-center px-4 pb-16 pt-20 text-center sm:pt-28">
           <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-            Split subscriptions,{" "}
-            <span className="text-primary">not friendships</span>
+            {COPY.hero.headlineA}
+            <span className="text-primary">{COPY.hero.headlineB}</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            SubSplit делит Netflix, Spotify и всё остальное между друзьями:
-            честные доли, автоматические напоминания и никаких неловких
-            разговоров о деньгах.
-          </p>
-
-          <p className="mt-8 text-2xl font-semibold sm:text-3xl">
-            <SavingsCounter />{" "}
-            <span className="text-lg font-normal text-muted-foreground sm:text-xl">
-              saved by our users this month
-            </span>
+            {COPY.hero.subheadline}
           </p>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               <Link href="/login">
-                Начать бесплатно
+                {COPY.hero.ctaPrimary}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="#how-it-works">
-                Узнать больше
+              <a href="#calculator">
+                {COPY.hero.ctaSecondary}
                 <ArrowDown className="ml-2 h-4 w-4" />
               </a>
             </Button>
           </div>
 
-          <p className="mt-6 text-sm text-muted-foreground">
-            Бесплатно до 3 подписок · Без карты · 2 минуты до первой группы
-          </p>
+          {/* Trust bar */}
+          <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            {COPY.hero.trust.map((item) => (
+              <li key={item} className="flex items-center gap-1.5">
+                <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -118,15 +165,15 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 py-20">
           <div className="text-center">
             <h2 className="text-3xl font-semibold tracking-tight">
-              Как это работает
+              {COPY.howItWorks.title}
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Три шага — и подписки перестают съедать ваш бюджет.
+              {COPY.howItWorks.subtitle}
             </p>
           </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {STEPS.map((step, i) => (
+            {COPY.howItWorks.steps.map((step, i) => (
               <div
                 key={step.title}
                 className="rounded-xl border bg-background p-6"
@@ -136,7 +183,7 @@ export default function LandingPage() {
                     <step.icon className="h-5 w-5" />
                   </span>
                   <span className="text-sm font-semibold text-muted-foreground">
-                    Шаг {i + 1}
+                    {COPY.howItWorks.stepLabel(i)}
                   </span>
                 </div>
                 <h3 className="mt-4 text-lg font-semibold">{step.title}</h3>
@@ -153,23 +200,14 @@ export default function LandingPage() {
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
               <Wallet className="h-4 w-4" />
-              Калькулятор экономии
+              {COPY.calculator.badge}
             </div>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight">
-              Сколько вы тратите в одиночку?
+              {COPY.calculator.title}
             </h2>
-            <p className="mt-4 text-muted-foreground">
-              Средняя подписка стоит{" "}
-              <span className="font-medium text-foreground">$12.99 в месяц</span>.
-              Пять подписок — это уже $780 в год. Разделите их с тремя друзьями —
-              и верните себе три четверти этой суммы.
-            </p>
+            <p className="mt-4 text-muted-foreground">{COPY.calculator.text}</p>
             <ul className="mt-6 space-y-3 text-sm">
-              {[
-                "Честный расчёт долей до копейки",
-                "Напоминания должникам автоматически",
-                "Годовые и ежемесячные подписки",
-              ].map((item) => (
+              {COPY.calculator.points.map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
                   {item}
@@ -186,14 +224,12 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 text-center">
           <Handshake className="h-10 w-10" />
           <h2 className="max-w-xl text-3xl font-semibold tracking-tight">
-            Хватит платить за всех. Делите честно.
+            {COPY.cta.title}
           </h2>
-          <p className="max-w-md text-primary-foreground/80">
-            Создайте первую группу за две минуты — бесплатно и без карты.
-          </p>
+          <p className="max-w-md text-primary-foreground/80">{COPY.cta.text}</p>
           <Button asChild size="lg" variant="secondary">
             <Link href="/login">
-              Начать бесплатно
+              {COPY.cta.button}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -205,20 +241,26 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row">
           <div className="flex items-center gap-2 font-medium text-foreground">
             <ShieldCheck className="h-4 w-4" />
-            SubSplit
+            {COPY.brand}
           </div>
           <nav className="flex flex-wrap items-center justify-center gap-6">
             <Link href="#how-it-works" className="hover:text-foreground">
-              Как это работает
+              {COPY.footer.howItWorks}
             </Link>
             <Link href="/pricing" className="hover:text-foreground">
-              Тарифы
+              {COPY.footer.pricing}
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground">
+              {COPY.footer.privacy}
+            </Link>
+            <Link href="/terms" className="hover:text-foreground">
+              {COPY.footer.terms}
             </Link>
             <Link href="/login" className="hover:text-foreground">
-              Вход
+              {COPY.footer.signIn}
             </Link>
           </nav>
-          <p>© {new Date().getFullYear()} SubSplit</p>
+          <p>© {new Date().getFullYear()} {COPY.brand}</p>
         </div>
       </footer>
     </div>
