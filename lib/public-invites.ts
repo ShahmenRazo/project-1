@@ -118,6 +118,8 @@ export async function getPublicInviteInfo(
   console.error(
     "[public-invites] DEBUG",
     JSON.stringify({
+      url: process.env.SUPABASE_INTERNAL_URL,
+      publicUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
       token,
       group_id: group.id,
       memberRows,
