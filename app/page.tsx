@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SavingsCalculator } from "@/components/landing/savings-calculator";
+import { AppPreview } from "@/components/landing/AppPreview";
+import { SocialProof } from "@/components/landing/SocialProof";
+import { AvailableEverywhere } from "@/components/landing/AvailableEverywhere";
 import { TrustBadges } from "@/components/trust/TrustBadges";
 
 export const dynamic = "force-dynamic";
@@ -141,6 +144,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* App preview */}
+      <AppPreview />
+
       {/* How it works */}
       <section id="how-it-works" className="border-t bg-muted/40">
         <div className="mx-auto max-w-5xl px-4 py-20">
@@ -199,6 +205,12 @@ export default function LandingPage() {
           <SavingsCalculator />
         </div>
       </section>
+
+      {/* Social proof */}
+      <SocialProof />
+
+      {/* Available everywhere */}
+      <AvailableEverywhere />
 
       {/* CTA */}
       <section className="border-t bg-primary px-4 py-16 text-primary-foreground">
