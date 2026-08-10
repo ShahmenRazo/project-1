@@ -12,6 +12,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
  *   /api/invites/* (публичная проверка приглашения по токену),
  *   /api/public-invites/* (публичные ссылки: страницы сами проверяют авторизацию),
  *   /api/og (динамические OG-картинки для соцсетей)
+ *   /api/waitlist (email-заявки с лендинга, анонимно)
  * - /login — для авторизованных редирект на /dashboard
  * - публичные: / (landing), /pricing, /auth/callback, /invite/[token]
  */
@@ -84,7 +85,8 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith("/api/cron/") &&
     !pathname.startsWith("/api/invites/") &&
     !pathname.startsWith("/api/public-invites/") &&
-    !pathname.startsWith("/api/og");
+    !pathname.startsWith("/api/og") &&
+    !pathname.startsWith("/api/waitlist");
   const isProtectedPage =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/groups") ||
