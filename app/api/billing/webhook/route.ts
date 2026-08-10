@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotification } from "@/lib/notifications";
+import { grantProMonth, markReferralConverted } from "@/lib/referrals";
 import {
   isProStatus,
   verifyWebhookSignature,
@@ -113,7 +114,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 
-  // --- 5. Уведомление пользователю ---
+  // --- 5. Реферальный бонус: при первой покупке Pro приглашённым
+  // оба (он и пригласивший) получают +1 месяц Pro ---
+  if (tier === "pro" && event === "subscription_created") {
+    const { data: referral } = await admin
+      .from("referrals")
+      .select("referred_by")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (referral && (await markReferralConverted(userId))) {
+      await grantProMonth(userId); // +1 месяц к LS-подписке
+      await grantProMonth(referral.referred_by);
+      await createNotification(
+        userId,
+        "system",
+        "Реферальный бонус: +1 месяц Pro за вашу рекомендацию"
+      );
+      await createNotification(
+        referral.referred_by,
+        "system",
+        "Ваш реферал оформил Pro — вы получили +1 месяц Pro бесплатно"
+      );
+    }
+  }
+
+  // --- 6. Уведомление пользователю ---
   await createNotification(
     userId,
     "system",

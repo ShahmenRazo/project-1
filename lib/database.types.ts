@@ -423,6 +423,96 @@ export interface Database {
           }
         ];
       };
+      referrals: {
+        Row: {
+          id: string;
+          user_id: string;
+          referred_by: string;
+          created_at: string;
+          converted: boolean;
+          converted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          referred_by: string;
+          created_at?: string;
+          converted?: boolean;
+          converted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          referred_by?: string;
+          created_at?: string;
+          converted?: boolean;
+          converted_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "referrals_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "referrals_referred_by_fkey";
+            columns: ["referred_by"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      public_invites: {
+        Row: {
+          id: string;
+          group_id: string;
+          token: string;
+          created_by: string;
+          max_uses: number;
+          uses_count: number;
+          expires_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          token: string;
+          created_by: string;
+          max_uses?: number;
+          uses_count?: number;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          group_id?: string;
+          token?: string;
+          created_by?: string;
+          max_uses?: number;
+          uses_count?: number;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "public_invites_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "public_invites_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       group_balances: {

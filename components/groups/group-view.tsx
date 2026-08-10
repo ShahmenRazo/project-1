@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { RemindButton } from "@/components/groups/remind-button";
 import { BalanceCalculator } from "@/components/groups/balance-calculator";
+import { PublicInviteDialog } from "@/components/groups/public-invite-dialog";
 import { formatMoney } from "@/lib/format";
 import { initials } from "@/lib/format";
 import { roundMoney } from "@/lib/utils";
@@ -74,6 +75,14 @@ export function GroupView({
         : subscription.price / 12
     );
   }, [subscription]);
+
+  // Месячная стоимость свободной доли (для публичной ссылки/шеринга)
+  const freeShareMonthly = useMemo(() => {
+    const used = members.reduce((sum, m) => sum + m.share_percent, 0);
+    const remaining = roundMoney(100 - used);
+    if (remaining <= 0) return 0;
+    return roundMoney((totalMonthly * remaining) / 100);
+  }, [members, totalMonthly]);
 
   const debtByUserId = useMemo(() => {
     const map = new Map<string, number>();
@@ -143,7 +152,18 @@ export function GroupView({
             )}
           </p>
         </div>
-        {isCreator && <RemindButton groupId={groupId} />}
+        {isCreator && (
+          <div className="flex gap-2">
+            <PublicInviteDialog
+              groupId={groupId}
+              groupName={groupName}
+              subscriptionName={subscription?.name ?? null}
+              shareMonthly={freeShareMonthly}
+              currency={currency}
+            />
+            <RemindButton groupId={groupId} />
+          </div>
+        )}
       </div>
 
       <Card>
