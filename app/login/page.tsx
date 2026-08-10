@@ -13,13 +13,19 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   const supabase = createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user) redirect("/");
+  if (user) redirect("/dashboard");
+
+  const authError = searchParams.error === "auth";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -47,6 +53,12 @@ export default async function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {authError && (
+              <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                Не удалось войти через внешний провайдер. Попробуйте ещё раз или
+                войдите через email.
+              </p>
+            )}
             <LoginForm />
           </CardContent>
         </Card>
