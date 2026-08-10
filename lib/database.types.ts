@@ -312,6 +312,47 @@ export interface Database {
           }
         ];
       };
+      invites: {
+        Row: {
+          id: string;
+          group_id: string;
+          email: string;
+          token: string;
+          share_percent: number;
+          status: "pending" | "accepted" | "expired";
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          email: string;
+          token: string;
+          share_percent: number;
+          status?: "pending" | "accepted" | "expired";
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          group_id?: string;
+          email?: string;
+          token?: string;
+          share_percent?: number;
+          status?: "pending" | "accepted" | "expired";
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invites_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "groups";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       notifications: {
         Row: {
           id: string;

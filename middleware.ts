@@ -5,9 +5,10 @@ import { createServerClient } from "@supabase/ssr";
  * Защита роутов + обновление сессии Supabase:
  * - /dashboard/*, /groups/*, /profile/* — только для авторизованных (иначе /login)
  * - /api/* — только для авторизованных (иначе 401 JSON);
- *   исключения: /api/billing/webhook (LemonSqueezy) и /api/cron/* (Bearer CRON_SECRET)
+ *   исключения: /api/billing/webhook (LemonSqueezy), /api/cron/* (Bearer CRON_SECRET),
+ *   /api/invites/* (публичная проверка приглашения по токену)
  * - /login — для авторизованных редирект на /dashboard
- * - публичные: / (landing), /pricing, /auth/callback
+ * - публичные: / (landing), /pricing, /auth/callback, /invite/[token]
  */
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -45,7 +46,8 @@ export async function middleware(request: NextRequest) {
   const isProtectedApi =
     isApi &&
     !pathname.startsWith("/api/billing/webhook") &&
-    !pathname.startsWith("/api/cron/");
+    !pathname.startsWith("/api/cron/") &&
+    !pathname.startsWith("/api/invites/");
   const isProtectedPage =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/groups") ||

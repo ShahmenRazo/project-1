@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import {
   ApiError,
@@ -9,11 +10,21 @@ import {
   requireUser,
 } from "@/lib/api";
 import { createGroupSchema } from "@/lib/schemas";
-import { resolveMemberUserIds } from "@/lib/members";
+import { resolveMemberUserIdsSoft } from "@/lib/members";
 import { notifyUser } from "@/lib/notifications";
+import { sendInviteEmail } from "@/lib/resend";
 import { getUserLimits } from "@/lib/billing/tier";
 import { formatMoney } from "@/lib/format";
 import { nextBillingDate, roundMoney, shareAmount } from "@/lib/utils";
+
+const INVITE_TTL_DAYS = 7;
+
+function inviteLink(token: string): string {
+  const origin =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    "http://localhost:3000";
+  return `${origin}/invite/${token}`;
+}
 
 // GET /api/groups — мои группы с моей долей и суммами долгов
 export async function GET() {
@@ -99,6 +110,7 @@ export async function GET() {
 
 // POST /api/groups — создать группу для деления подписки
 // Тело: { name, subscription_id, members?: [{ user_id | email, share_percent }] }
+// Незарегистрированные email → создаётся invite (таблица invites) + письмо Resend
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
@@ -124,8 +136,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // --- 2. Резолвим членов и проверяем доли ---
-    const resolved = await resolveMemberUserIds(input.members);
+    // --- 2. Резолвим членов: найденные + ненайденные (для invite) ---
+    const { resolved, missing } = await resolveMemberUserIdsSoft(input.members);
     if (resolved.some((m) => m.user_id === user.id)) {
       throw new ApiError(
         400,
@@ -134,8 +146,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const allShares = [
+      ...resolved.map((m) => m.share_percent),
+      ...missing.map((m) => m.share_percent),
+    ];
     const memberSum = roundMoney(
-      resolved.reduce((sum, m) => sum + m.share_percent, 0)
+      allShares.reduce((sum, s) => sum + s, 0)
     );
     if (memberSum >= 100) {
       throw new ApiError(
@@ -146,7 +162,9 @@ export async function POST(request: NextRequest) {
     }
     const creatorShare = roundMoney(100 - memberSum);
 
-    // Лимит тарифа: Free — до 2 человек в группе (включая создателя)
+    // Лимит тарифа: Free — до 2 человек в группе (включая создателя).
+    // Считаем только фактических участников; приглашённые добавятся при приёме
+    // (тогда лимит проверяется повторно).
     const limits = await getUserLimits(supabase, user.id);
     const totalPeople = resolved.length + 1;
     if (totalPeople > limits.max_group_members) {
@@ -179,7 +197,7 @@ export async function POST(request: NextRequest) {
       throw groupError;
     }
 
-    // --- 4. Добавляем создателя + членов в group_members ---
+    // --- 4. Добавляем создателя + найденных членов в group_members ---
     const memberRows = [
       { user_id: user.id, share_percent: creatorShare },
       ...resolved,
@@ -196,7 +214,7 @@ export async function POST(request: NextRequest) {
 
     if (membersError) throw membersError;
 
-    // --- 5. Создаём долги (payments): каждый член -> владелец подписки ---
+    // --- 5. Создаём долги (payments): каждый найденный член -> владелец подписки ---
     const dueDate = nextBillingDate(subscription.billing_day);
     for (const member of resolved) {
       if (member.user_id === subscription.user_id) continue;
@@ -230,7 +248,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return ok({ group, creator_share: creatorShare }, { status: 201 });
+    // --- 6. Invite-флоу для незарегистрированных email ---
+    const invited: { email: string; link: string }[] = [];
+    for (const m of missing) {
+      const expiresAt = new Date(
+        Date.now() + INVITE_TTL_DAYS * 24 * 60 * 60 * 1000
+      ).toISOString();
+
+      let token: string;
+      const { data: existing } = await supabase
+        .from("invites")
+        .select("id, token")
+        .eq("group_id", group.id)
+        .eq("email", m.email)
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (existing) {
+        // Повторное приглашение того же email — продлеваем срок и обновляем долю
+        token = existing.token;
+        const { error: updError } = await supabase
+          .from("invites")
+          .update({ share_percent: m.share_percent, expires_at: expiresAt })
+          .eq("id", existing.id);
+        if (updError) throw updError;
+      } else {
+        token = randomBytes(32).toString("hex");
+        const { error: invError } = await supabase.from("invites").insert({
+          group_id: group.id,
+          email: m.email,
+          token,
+          share_percent: m.share_percent,
+          expires_at: expiresAt,
+        });
+        if (invError) throw invError;
+      }
+
+      const link = inviteLink(token);
+      const { sent } = await sendInviteEmail({
+        to: m.email,
+        groupName: group.name,
+        subscriptionName: subscription.name,
+        sharePercent: m.share_percent,
+        inviteLink: link,
+      });
+      invited.push({ email: m.email, link: sent ? link : "" });
+    }
+
+    return ok(
+      { group, creator_share: creatorShare, invited },
+      { status: 201 }
+    );
   } catch (error) {
     return fail(error);
   }
