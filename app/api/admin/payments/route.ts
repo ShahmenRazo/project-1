@@ -4,6 +4,11 @@ import { requireAdmin, adminErrorResponse } from "@/lib/admin/guard";
 
 export const dynamic = "force-dynamic";
 
+interface UserRef {
+  email: string | null;
+  display_name: string | null;
+}
+
 interface PaymentRow {
   id: string;
   amount: number;
@@ -13,8 +18,27 @@ interface PaymentRow {
   created_at: string;
   paid_at: string | null;
   groups: { name: string } | null;
-  payments_from: { email: string | null; display_name: string | null } | null;
-  payments_to: { email: string | null; display_name: string | null } | null;
+}
+
+// PostgREST 14.12 не умеет два FK-embed'а payments->users в одном select
+// (баг: "payments_users_1 specified more than once"), поэтому users
+// подтягиваются двумя отдельными запросами и сливаются по id.
+async function fetchUsers(
+  admin: ReturnType<typeof createAdminClient>,
+  ids: string[],
+  fk: "payments_from_user_id_fkey" | "payments_to_user_id_fkey"
+): Promise<Map<string, UserRef>> {
+  const map = new Map<string, UserRef>();
+  if (ids.length === 0) return map;
+  const { data, error } = await admin
+    .from("payments")
+    .select(`id, users!${fk}(email, display_name)`)
+    .in("id", ids);
+  if (error) throw error;
+  for (const row of data as unknown as { id: string; users: UserRef | null }[]) {
+    if (row.users) map.set(row.id, row.users);
+  }
+  return map;
 }
 
 export async function GET(req: NextRequest) {
@@ -26,9 +50,7 @@ export async function GET(req: NextRequest) {
 
     let query = admin
       .from("payments")
-      .select(
-        "id, amount, currency, status, due_date, created_at, paid_at, group_id, groups(name), users!payments_from_user_id_fkey!payments_from(email, display_name), users!payments_to_user_id_fkey!payments_to(email, display_name)"
-      );
+      .select("id, amount, currency, status, due_date, created_at, paid_at, group_id, groups(name)");
 
     if (status === "pending" || status === "paid") {
       query = query.eq("status", status);
@@ -41,6 +63,11 @@ export async function GET(req: NextRequest) {
     if (error) throw error;
 
     const rows = data as unknown as PaymentRow[];
+    const ids = rows.map((p) => p.id);
+    const [fromMap, toMap] = await Promise.all([
+      fetchUsers(admin, ids, "payments_from_user_id_fkey"),
+      fetchUsers(admin, ids, "payments_to_user_id_fkey"),
+    ]);
 
     return Response.json({
       data: {
@@ -53,10 +80,10 @@ export async function GET(req: NextRequest) {
           created_at: p.created_at,
           paid_at: p.paid_at,
           group_name: p.groups?.name ?? null,
-          from_email: p.payments_from?.email ?? null,
-          from_name: p.payments_from?.display_name ?? null,
-          to_email: p.payments_to?.email ?? null,
-          to_name: p.payments_to?.display_name ?? null,
+          from_email: fromMap.get(p.id)?.email ?? null,
+          from_name: fromMap.get(p.id)?.display_name ?? null,
+          to_email: toMap.get(p.id)?.email ?? null,
+          to_name: toMap.get(p.id)?.display_name ?? null,
         })),
       },
     });
