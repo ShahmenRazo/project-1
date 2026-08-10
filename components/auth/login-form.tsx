@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { createBrowserClientInstance } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 /** Локальный путь после входа (из ?next=), защита от open redirect */
 function safeNext(value: string | null): string {
@@ -69,6 +70,7 @@ export function LoginForm() {
         });
         if (error) throw error;
         toast.success("Аккаунт создан. Добро пожаловать!");
+        trackEvent("sign_up", { method: "email" });
       }
 
       router.push(next);

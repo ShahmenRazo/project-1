@@ -16,6 +16,8 @@ import { SocialProof } from "@/components/landing/SocialProof";
 import { AvailableEverywhere } from "@/components/landing/AvailableEverywhere";
 import { EmailCapture } from "@/components/landing/EmailCapture";
 import { FAQ } from "@/components/landing/FAQ";
+import { BeforeAfter } from "@/components/landing/BeforeAfter";
+import { VideoPlaceholder } from "@/components/landing/VideoPlaceholder";
 import { TrustBadges } from "@/components/trust/TrustBadges";
 
 export const dynamic = "force-dynamic";
@@ -126,6 +128,9 @@ export default function LandingPage() {
             {COPY.hero.subheadline}
           </p>
 
+          {/* Trust badges (под subtitle) */}
+          <TrustBadges />
+
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               <Link href="/login">
@@ -143,14 +148,14 @@ export default function LandingPage() {
 
           {/* Waitlist email capture */}
           <EmailCapture />
-
-          {/* Trust badges */}
-          <TrustBadges />
         </div>
       </section>
 
       {/* App preview */}
       <AppPreview />
+
+      {/* Video placeholder */}
+      <VideoPlaceholder />
 
       {/* How it works */}
       <section id="how-it-works" className="border-t bg-muted/40">
@@ -210,6 +215,9 @@ export default function LandingPage() {
           <SavingsCalculator />
         </div>
       </section>
+
+      {/* Before / After */}
+      <BeforeAfter />
 
       {/* Social proof */}
       <SocialProof />

@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { trackEvent } from "@/lib/analytics";
 import {
   Select,
   SelectContent,
@@ -158,6 +159,7 @@ export function CreateGroupModal() {
       }
 
       toast.success("Группа создана, участникам отправлены уведомления");
+      trackEvent("create_group", { group_name: name.trim() });
       reset();
       setOpen(false);
       router.refresh();

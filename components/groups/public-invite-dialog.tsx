@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatMoney } from "@/lib/format";
+import { trackEvent } from "@/lib/analytics";
 
 interface InviteData {
   token: string;
@@ -76,6 +77,7 @@ export function PublicInviteDialog({
       }
       await loadInvite();
       toast.success("Ссылка создана");
+      trackEvent("invite_sent", { method: "public_link" });
     } catch {
       toast.error("Ошибка сети, попробуйте ещё раз");
     } finally {

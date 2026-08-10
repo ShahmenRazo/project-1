@@ -27,3 +27,18 @@ export function enableAnalytics(): void {
   script.dataset.cookieConsent = "analytics";
   document.head.appendChild(script);
 }
+
+/**
+ * Отправка событий в Google Analytics 4 (gtag).
+ * Безопасно вызывать с любой стороны: если GA не подключён (NEXT_PUBLIC_GA_ID
+ * не задан) или скрипт ещё не загрузился — вызов молча игнорируется.
+ */
+export function trackEvent(
+  name: string,
+  params?: Record<string, string | number | boolean>
+): void {
+  if (typeof window === "undefined") return;
+  const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+  if (typeof w.gtag !== "function") return;
+  w.gtag("event", name, params);
+}

@@ -1,13 +1,13 @@
 import { CheckCircle2 } from "lucide-react";
 
 const BADGES = [
-  { icon: "🔒", label: "SSL Secure" },
-  { icon: "💳", label: "No credit card to start" },
-  { icon: "⚡", label: "Setup in 2 min" },
-  { icon: "🌍", label: "Used in 15+ countries" },
+  { icon: "⭐️", label: "4.9/5 from beta users" },
+  { icon: "🔒", label: "Bank-level encryption" },
+  { icon: "⚡", label: "2-minute setup" },
+  { icon: "💳", label: "No credit card required" },
 ] as const;
 
-/** Блок доверия под hero: краткие гарантии для нового посетителя */
+/** Блок доверия в hero: краткие гарантии для нового посетителя */
 export function TrustBadges() {
   return (
     <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">

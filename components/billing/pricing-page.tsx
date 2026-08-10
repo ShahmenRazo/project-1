@@ -26,6 +26,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useCheckout } from "@/lib/billing/use-checkout";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import type { SubscriptionTier } from "@/lib/database.types";
 
@@ -283,7 +284,13 @@ export function PricingPage({
           annual={annual}
           featured
           isCurrent={isPro}
-          onAction={() => startCheckout(annual ? "yearly" : "monthly")}
+          onAction={() => {
+            trackEvent("pro_upgrade", {
+              source: "pricing_page",
+              period: annual ? "yearly" : "monthly",
+            });
+            void startCheckout(annual ? "yearly" : "monthly");
+          }}
           actionLoading={loading}
           portalUrl={portalUrl}
         />

@@ -14,6 +14,7 @@ import {
 import { PRO_PLAN } from "@/lib/billing/plans";
 import { useCheckout } from "@/lib/billing/use-checkout";
 import { formatMoney } from "@/lib/format";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * Upsell-модалка: показывается free-пользователю, когда он
@@ -58,7 +59,10 @@ export function UpsellModal({
 
         <div className="flex flex-col gap-2">
           <Button
-            onClick={() => startCheckout()}
+            onClick={() => {
+              trackEvent("pro_upgrade", { source: "upsell_modal" });
+              void startCheckout();
+            }}
             disabled={loading}
             className="w-full"
           >
