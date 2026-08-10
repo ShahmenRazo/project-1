@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Button } from "@/components/ui/button";
 
 export function AcceptInviteButton({ token }: { token: string }) {
@@ -21,7 +22,7 @@ export function AcceptInviteButton({ token }: { token: string }) {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Failed to accept invitation");
+        toast.error(await apiErrorMessageAsync(res, json?.error?.message ?? "Failed to accept invitation"));
         return;
       }
 

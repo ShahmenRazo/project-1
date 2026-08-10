@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, Bell, CheckCircle2, Mail, Megaphone, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
 import { NotificationListSkeleton } from "@/components/ui/skeleton";
 import {
@@ -96,9 +97,12 @@ export function NotificationBell() {
           {loading ? (
             <NotificationListSkeleton />
           ) : notifications.length === 0 ? (
-            <p className="p-4 text-center text-sm text-muted-foreground">
-              No notifications yet
-            </p>
+            <EmptyState
+              icon={Bell}
+              title="No notifications yet"
+              description="Payment reminders and group invites will appear here"
+              className="m-4 border-dashed"
+            />
           ) : (
             notifications.map((n, i) => {
               const Icon = TYPE_ICONS[n.type] ?? Bell;

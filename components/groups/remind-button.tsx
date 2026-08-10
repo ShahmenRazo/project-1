@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Button } from "@/components/ui/button";
 
 export function RemindButton({ groupId }: { groupId: string }) {
@@ -22,7 +23,7 @@ export function RemindButton({ groupId }: { groupId: string }) {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Failed to send reminders");
+        toast.error(await apiErrorMessageAsync(res, json?.error?.message ?? "Failed to send reminders"));
         return;
       }
 

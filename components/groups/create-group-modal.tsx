@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -154,7 +155,7 @@ export function CreateGroupModal() {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Failed to create group");
+        toast.error(await apiErrorMessageAsync(res, json?.error?.message ?? "Failed to create group"));
         return;
       }
 

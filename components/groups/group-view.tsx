@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, CreditCard, UserX } from "lucide-react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -110,7 +111,7 @@ export function GroupView({
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Failed to mark as paid");
+        toast.error(await apiErrorMessageAsync(res, json?.error?.message ?? "Failed to mark as paid"));
         return;
       }
 

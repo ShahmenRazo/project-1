@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -89,7 +90,7 @@ export function CreateSubscriptionModal() {
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Failed to create subscription");
+        toast.error(await apiErrorMessageAsync(res, json?.error?.message ?? "Failed to create subscription"));
         return;
       }
 

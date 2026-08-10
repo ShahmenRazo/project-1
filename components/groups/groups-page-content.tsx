@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { GroupsSection } from "@/components/dashboard/groups-section";
 import type { DashboardGroup } from "@/lib/types";
 
@@ -21,7 +22,7 @@ export function GroupsPageContent() {
           };
           if (!cancelled) setGroups(json.data?.groups ?? []);
         } else if (!cancelled) {
-          toast.error("Failed to load groups");
+          toast.error(await apiErrorMessageAsync(res, "Failed to load groups"));
         }
       } catch {
         if (!cancelled) toast.error("Network error, please refresh the page");

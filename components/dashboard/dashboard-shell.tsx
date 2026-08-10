@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { CreateSubscriptionModal } from "@/components/subscriptions/create-subscription-modal";
 import { UpsellModal } from "@/components/billing/upsell-modal";
+import { EmptyState } from "@/components/ui/empty-state";
 import { onForegroundMessage } from "@/lib/push/client";
 import { CATEGORY_LABELS } from "@/lib/constants";
 import { LIMITS } from "@/lib/billing/plans";
@@ -165,19 +166,12 @@ export function DashboardShell({
       </div>
 
       {subscriptions.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <Wallet className="h-8 w-8 text-muted-foreground" />
-            <div>
-              <p className="font-medium">No subscriptions yet</p>
-              <p className="text-sm text-muted-foreground">
-                Add Netflix, Spotify, or any other subscription to start
-                splitting with friends
-              </p>
-            </div>
-            <CreateSubscriptionModal />
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Wallet}
+          title="No subscriptions yet"
+          description="Add Netflix, Spotify, or any other subscription to start splitting with friends"
+          action={<CreateSubscriptionModal />}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {subscriptions.map((sub) => {

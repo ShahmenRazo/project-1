@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { createBrowserClientInstance } from "@/lib/supabase/client";
+import { CHANGELOG_VERSION } from "@/lib/constants";
+import { toast } from "sonner";
 import type { SubscriptionTier } from "@/lib/database.types";
 
 export interface AppShellUser {
@@ -59,6 +61,19 @@ export function AppShell({
     beat();
     const timer = setInterval(beat, 5 * 60 * 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // What's new: toast при первом входе после обновления
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem("subsplit_changelog_seen");
+      if (seen !== CHANGELOG_VERSION) {
+        localStorage.setItem("subsplit_changelog_seen", CHANGELOG_VERSION);
+        toast.info("SubSplit just got better! Check out the new features.");
+      }
+    } catch {
+      // localStorage недоступен — пропускаем
+    }
   }, []);
 
   const handleSignOut = async () => {

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { CreateGroupModal } from "@/components/groups/create-group-modal";
 import { formatMoney } from "@/lib/format";
 import { roundMoney } from "@/lib/utils";
@@ -52,18 +53,12 @@ export function GroupsSection({
           ))}
         </div>
       ) : groups.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-            <Users className="h-8 w-8 text-muted-foreground" />
-            <div>
-              <p className="font-medium">No groups yet</p>
-              <p className="text-sm text-muted-foreground">
-                Create a group and add friends to split a subscription
-              </p>
-            </div>
-            <CreateGroupModal />
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Users}
+          title="No groups yet"
+          description="Create a group to start splitting."
+          action={<CreateGroupModal />}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((g) => (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { GroupsSection } from "@/components/dashboard/groups-section";
 import {
@@ -39,7 +40,7 @@ export function DashboardContent({
           const json = (await subsRes.json()) as { data?: DashboardSubscription[] };
           if (!cancelled) setSubscriptions(json.data ?? []);
         } else if (!cancelled) {
-          toast.error("Failed to load subscriptions");
+          toast.error(await apiErrorMessageAsync(subsRes, "Failed to load subscriptions"));
         }
 
         if (!cancelled && groupsRes.ok) {
@@ -48,7 +49,7 @@ export function DashboardContent({
           };
           if (!cancelled) setGroups(json.data?.groups ?? []);
         } else if (!cancelled) {
-          toast.error("Failed to load groups");
+          toast.error(await apiErrorMessageAsync(groupsRes, "Failed to load groups"));
         }
       } catch {
         if (!cancelled) toast.error("Network error, please refresh the page");

@@ -37,3 +37,7 @@ export const CURRENCIES = [
 ] as const;
 
 export const BILLING_DAYS = Array.from({ length: 28 }, (_, i) => i + 1);
+
+/** Версия changelog: показываем toast «What's new» один раз после обновления */
+export const CHANGELOG_VERSION = "2026-08-11";
+

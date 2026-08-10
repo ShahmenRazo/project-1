@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Button } from "@/components/ui/button";
 
 /** Кнопка «Присоединиться» по публичной ссылке (авторизованный пользователь) */
@@ -30,7 +31,7 @@ export function JoinGroupButton({
       } | null;
 
       if (!res.ok) {
-        toast.error(json?.error?.message ?? "Failed to join");
+        toast.error(await apiErrorMessageAsync(res, json?.error?.message ?? "Failed to join"));
         return;
       }
       toast.success("You're in the group! Welcome");
