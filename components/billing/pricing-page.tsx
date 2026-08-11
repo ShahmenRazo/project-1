@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Check,
-  Crown,
-  ExternalLink,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+import { Bell, Check, Crown, ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   Accordion,
@@ -25,9 +20,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useCheckout } from "@/lib/billing/use-checkout";
-import { trackEvent } from "@/lib/analytics";
+// Платёжный код (checkout) отключён на время beta — НЕ удалён, закомментирован.
+// import { useCheckout } from "@/lib/billing/use-checkout";
+// import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { SubscriptionTier } from "@/lib/database.types";
 
 // ---------- Copy (US market) ----------
@@ -97,6 +94,7 @@ const COPY = {
   ],
 } as const;
 
+/** Платёжный UI ниже НЕ удалён — закомментирован до запуска Pro (см. render). */
 function priceLabel(price: number, period: string): string {
   return price === 0 ? "$0" : `$${price.toFixed(2)}`;
 }
@@ -217,22 +215,88 @@ export function PricingPage({
   portalUrl,
   upgradeStatus,
   authenticated = false,
+  userEmail,
 }: {
   currentTier: SubscriptionTier;
   portalUrl?: string;
   upgradeStatus?: string;
   authenticated?: boolean;
+  userEmail?: string;
 }) {
-  const { loading, startCheckout } = useCheckout();
-  const [annual, setAnnual] = useState(false);
-  const isPro = currentTier === "pro";
+  // Платёжный код (checkout) отключён на время beta — закомментирован, не удалён.
+  // const { loading, startCheckout } = useCheckout();
+  // const [annual, setAnnual] = useState(false);
+  // const isPro = currentTier === "pro";
+
+  const [email, setEmail] = useState(userEmail ?? "");
+  const [waitlistStatus, setWaitlistStatus] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+
+  async function handleWaitlist(e: React.FormEvent) {
+    e.preventDefault();
+    if (waitlistStatus === "loading") return;
+    setWaitlistStatus("loading");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = (await res.json().catch(() => null)) as {
+        error?: { message?: string };
+      } | null;
+      if (!res.ok) throw new Error(json?.error?.message ?? "Waitlist failed");
+      toast.success("You're on the list! We'll email you when Pro launches.");
+      setWaitlistStatus("idle");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      setWaitlistStatus("error");
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">{COPY.title}</h1>
-        <p className="mt-2 text-muted-foreground">{COPY.subtitle}</p>
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+          <Crown className="h-7 w-7 text-primary" />
+        </div>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Pro is coming soon
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Premium features are on the way. All features are free during beta!
+        </p>
       </div>
+
+      <form
+        onSubmit={handleWaitlist}
+        className="mx-auto mt-8 flex w-full max-w-md flex-col gap-2 sm:flex-row"
+      >
+        <Input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          aria-label="Email address"
+          disabled={waitlistStatus === "loading"}
+        />
+        <Button type="submit" disabled={waitlistStatus === "loading"} className="shrink-0">
+          {waitlistStatus === "loading" ? (
+            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+          ) : (
+            <Bell className="mr-1.5 h-4 w-4" />
+          )}
+          Notify me when Pro launches
+        </Button>
+      </form>
+      <p className="mt-2 text-center text-xs text-muted-foreground">
+        No spam — one email when paid plans open up.
+      </p>
+
+      {/*
+      ============ Платёжный UI (закомментирован до запуска Pro) ============
 
       {upgradeStatus === "success" && (
         <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-800">
@@ -240,27 +304,12 @@ export function PricingPage({
         </div>
       )}
 
-      {/* Annual toggle */}
       <div className="mt-8 flex items-center justify-center gap-3">
-        <span
-          className={cn(
-            "text-sm",
-            !annual ? "font-medium text-foreground" : "text-muted-foreground"
-          )}
-        >
+        <span className={cn("text-sm", !annual ? "font-medium text-foreground" : "text-muted-foreground")}>
           Monthly
         </span>
-        <Switch
-          checked={annual}
-          onCheckedChange={setAnnual}
-          aria-label={COPY.annualLabel}
-        />
-        <span
-          className={cn(
-            "text-sm",
-            annual ? "font-medium text-foreground" : "text-muted-foreground"
-          )}
-        >
+        <Switch checked={annual} onCheckedChange={setAnnual} aria-label={COPY.annualLabel} />
+        <span className={cn("text-sm", annual ? "font-medium text-foreground" : "text-muted-foreground")}>
           {COPY.annualLabel}
         </span>
         <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600">
@@ -278,7 +327,6 @@ export function PricingPage({
           actionLoading={false}
           href={authenticated ? undefined : "/login"}
         />
-
         <PlanCard
           plan={COPY.plans.pro}
           annual={annual}
@@ -300,7 +348,6 @@ export function PricingPage({
         {COPY.finePrint}
       </p>
 
-      {/* FAQ */}
       <section id="faq" className="mt-16 scroll-mt-16">
         <h2 className="text-center text-2xl font-semibold tracking-tight">
           {COPY.faqTitle}
@@ -308,14 +355,14 @@ export function PricingPage({
         <Accordion type="single" collapsible className="mx-auto mt-8 max-w-xl">
           {COPY.faq.map((item) => (
             <AccordionItem key={item.q} value={item.q}>
-              <AccordionTrigger className="text-left">
-                {item.q}
-              </AccordionTrigger>
+              <AccordionTrigger className="text-left">{item.q}</AccordionTrigger>
               <AccordionContent>{item.a}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       </section>
+      ============ конец платёжного UI ============
+      */}
     </div>
   );
 }

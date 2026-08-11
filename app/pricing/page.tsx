@@ -8,22 +8,22 @@ import type { SubscriptionTier } from "@/lib/database.types";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "SubSplit Pricing — Free & Pro Plans",
+  title: "SubSplit — Pro is coming soon",
   description:
-    "SubSplit is free to start. Pro costs $3.99/month for unlimited groups, automatic reminders and payment history. Cancel anytime.",
+    "Premium features are on the way. All SubSplit features are free during beta — split subscriptions with friends at no cost.",
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "SubSplit Pricing — Free & Pro Plans",
+    title: "SubSplit — Pro is coming soon",
     description:
-      "SubSplit is free to start. Pro costs $3.99/month for unlimited groups, automatic reminders and payment history. Cancel anytime.",
+      "Premium features are on the way. All SubSplit features are free during beta — split subscriptions with friends at no cost.",
     url: "/pricing",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SubSplit Pricing — Free & Pro Plans",
+    title: "SubSplit — Pro is coming soon",
     description:
-      "SubSplit is free to start. Pro costs $3.99/month for unlimited groups, automatic reminders and payment history. Cancel anytime.",
+      "Premium features are on the way. All SubSplit features are free during beta — split subscriptions with friends at no cost.",
   },
 };
 
@@ -80,6 +80,7 @@ export default async function PricingPageRoute({
         portalUrl={portalUrl}
         upgradeStatus={searchParams.status}
         authenticated={!!user}
+        userEmail={email}
       />
     </div>
   );

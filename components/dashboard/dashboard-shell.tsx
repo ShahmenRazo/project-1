@@ -79,14 +79,16 @@ export function DashboardShell({
   }, []);
 
   // --- Freemium: на Free больше лимита добавлять нельзя — показываем upsell ---
-  const isFree = profile.subscription_tier === "free";
-  const atSubscriptionLimit =
-    isFree && subscriptions.length >= LIMITS.free.max_subscriptions;
-  const AddSubscriptionControl = atSubscriptionLimit ? (
-    <UpsellModal feature="adding a 4th subscription" />
-  ) : (
-    <CreateSubscriptionModal />
-  );
+  // Pro отключён на время beta (PRO_DISABLED) — лимиты безграничны, upsell не показываем.
+  // const isFree = profile.subscription_tier === "free";
+  // const atSubscriptionLimit =
+  //   isFree && subscriptions.length >= LIMITS.free.max_subscriptions;
+  // const AddSubscriptionControl = atSubscriptionLimit ? (
+  //   <UpsellModal feature="adding a 4th subscription" />
+  // ) : (
+  //   <CreateSubscriptionModal />
+  // );
+  const AddSubscriptionControl = <CreateSubscriptionModal />;
 
   return (
     <div className="space-y-6">
@@ -98,7 +100,8 @@ export function DashboardShell({
           <p className="text-sm text-muted-foreground">
             Manage subscriptions and split costs with friends
           </p>
-          {isFree && (
+          {/* Pro скрыт на время beta */}
+          {/* {isFree && (
             <p className="mt-1 text-xs text-muted-foreground">
               Free plan: {subscriptions.length}/{LIMITS.free.max_subscriptions}{" "}
               subscriptions ·{" "}
@@ -106,7 +109,7 @@ export function DashboardShell({
                 Go Pro
               </a>
             </p>
-          )}
+          )} */}
         </div>
         {AddSubscriptionControl}
       </div>
@@ -169,7 +172,7 @@ export function DashboardShell({
         <EmptyState
           icon={Wallet}
           title="No subscriptions yet"
-          description="Add Netflix, Spotify, or any other subscription to start splitting with friends"
+          description="Add your first one!"
           action={<CreateSubscriptionModal />}
         />
       ) : (

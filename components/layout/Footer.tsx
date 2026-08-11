@@ -9,7 +9,7 @@ const COPY = {
       title: "Product",
       links: [
         { label: "Features", href: "/#how-it-works" },
-        { label: "Pricing", href: "/pricing" },
+        { label: "Pricing (Coming soon)", href: "/pricing" },
         { label: "FAQ", href: "/faq" },
       ],
     },

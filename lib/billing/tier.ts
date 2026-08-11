@@ -17,11 +17,20 @@ export async function getUserTier(
   return data?.subscription_tier ?? "free";
 }
 
+/**
+ * Pro отключён на время beta: все лимиты безграничны, Pro-гварды пропускают.
+ * Код LemonSqueezy/webhooks/платежей при этом остаётся нетронутым.
+ */
+export const PRO_DISABLED = true;
+
 /** Лимиты текущего плана пользователя */
 export async function getUserLimits(
   supabase: DbClient,
   userId: string
 ): Promise<PlanLimits> {
+  if (PRO_DISABLED) {
+    return { max_subscriptions: Infinity, max_group_members: Infinity };
+  }
   return LIMITS[await getUserTier(supabase, userId)];
 }
 
@@ -33,6 +42,7 @@ export async function requirePro(
   supabase: DbClient,
   userId: string
 ): Promise<void> {
+  if (PRO_DISABLED) return;
   const tier = await getUserTier(supabase, userId);
   if (tier !== "pro") {
     throw new ApiError(

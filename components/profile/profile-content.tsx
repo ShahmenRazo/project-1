@@ -76,17 +76,20 @@ export function ProfileContent({
             <Gem className="h-4 w-4" /> Plan
           </CardTitle>
           <CardDescription>
-            Free includes 3 subscriptions and up to 2 people per group. Pro
-            removes the limits.
+            All features are free during beta. Pro is coming soon.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button asChild variant="outline" className="w-full">
+          {/* Pro скрыт на время beta — вернётся с запуском Pro */}
+          {/* <Button asChild variant="outline" className="w-full">
             <Link href="/pricing">
               <CreditCard className="h-4 w-4" />
               {user.subscription_tier === "pro" ? "Manage plan" : "Go Pro"}
             </Link>
-          </Button>
+          </Button> */}
+          <p className="text-sm text-muted-foreground">
+            All features are free during beta.
+          </p>
         </CardContent>
       </Card>
 
