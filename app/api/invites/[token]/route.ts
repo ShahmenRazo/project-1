@@ -130,8 +130,9 @@ export async function POST(
       );
     }
 
-    // Контроль долей: если сумма превысит 100%, долю уступает создатель
-    const { data: members } = await supabase
+    // Контроль долей: если сумма превысит 100%, долю уступает создатель.
+    // admin-клиент: RLS скрывает group_members не-участникам.
+    const { data: members } = await admin
       .from("group_members")
       .select("user_id, share_percent")
       .eq("group_id", group.id);
@@ -159,7 +160,8 @@ export async function POST(
           "SHARES_EXCEEDED"
         );
       }
-      const { error: creatorError } = await supabase
+      // admin-клиент: RLS не даст изменить строку создателя через user-клиент
+      const { error: creatorError } = await admin
         .from("group_members")
         .update({
           share_percent: roundMoney(creatorMember.share_percent - overflow),
