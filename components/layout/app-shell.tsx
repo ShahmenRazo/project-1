@@ -38,8 +38,8 @@ export interface AppShellUser {
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/groups", label: "Groups", icon: Users },
-  // Pro временно скрыт (beta: все функции бесплатны) — вернётся с запуском Pro.
-  // { href: "/pricing", label: "Pricing", icon: Gem },
+  // Pro ещё не запущен: страница /pricing показывает «Pro is coming soon»
+  { href: "/pricing", label: "Pricing", icon: Gem },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
@@ -135,12 +135,12 @@ export function AppShell({
                     <User className="mr-2 h-4 w-4" /> Profile
                   </Link>
                 </DropdownMenuItem>
-                {/* Pro скрыт на время beta */}
-                {/* <DropdownMenuItem asChild>
+                {/* Pro пока «Coming soon» — страница /pricing ведёт на waitlist */}
+                <DropdownMenuItem asChild>
                   <Link href="/pricing">
                     <Gem className="mr-2 h-4 w-4" /> Pricing
                   </Link>
-                </DropdownMenuItem> */}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   disabled={signingOut}
