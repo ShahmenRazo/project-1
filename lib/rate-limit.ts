@@ -2,12 +2,15 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
 /**
- * Rate limiting через Upstash Redis (REST API, работает на Edge).
+ * Rate limiting.
  *
- * Если UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN не заданы —
- * лимиты отключены (graceful fallback для локальной разработки).
- * Безопасно: без Redis сервис работает, но без защиты.
+ * Приоритет: Upstash Redis (REST API, работает и на Edge) → если
+ * UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN не заданы, используется
+ * in-memory sliding window (fallback для одного процесса — локальная
+ * разработка и single-node VPS). Без Redis защита работает, но не
+ * распределяется между процессами.
  */
+
 const REST_URL = process.env.UPSTASH_REDIS_REST_URL;
 const REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -40,11 +43,55 @@ const adminLimiter = isConfigured
     })
   : null;
 
+/**
+ * In-memory fallback: скользящее окно в 60 секунд на (путь, IP).
+ * Map<`${path}|${ip}`, number[]> — массив таймстампов запросов.
+ */
+const memoryBuckets = new Map<string, number[]>();
+const MEMORY_PRUNE_MS = 60_000;
+
+function memoryLimit(
+  key: string,
+  limit: number,
+  windowMs: number
+): { limited: boolean; retryAfter: number } {
+  const now = Date.now();
+  const cutoff = now - windowMs;
+
+  const buckets = memoryBuckets.get(key) ?? [];
+  const recent = buckets.filter((t) => t > cutoff);
+
+  if (recent.length >= limit) {
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((recent[0] - cutoff) / 1000)
+    );
+    memoryBuckets.set(key, recent);
+    return { limited: true, retryAfter };
+  }
+
+  recent.push(now);
+  memoryBuckets.set(key, recent);
+
+  // периодическая очистка мёртвых ключей
+  if (Math.random() < 0.01) {
+    for (const [k, times] of memoryBuckets) {
+      if (times.every((t) => now - t > MEMORY_PRUNE_MS)) {
+        memoryBuckets.delete(k);
+      }
+    }
+  }
+
+  return { limited: false, retryAfter: 0 };
+}
+
 export interface RateLimitResult {
   limited: boolean;
   /** Секунды до сброса лимита (для Retry-After) */
   retryAfter: number;
 }
+
+const WINDOW_MS = 60_000;
 
 /**
  * Проверка лимита для пути и IP.
@@ -60,24 +107,32 @@ export async function checkRateLimit(
     return { limited: false, retryAfter: 0 };
   }
 
-  const limiter = pathname.startsWith("/api/auth/")
-    ? authLimiter
-    : pathname.startsWith("/api/admin/")
-      ? adminLimiter
-      : apiLimiter;
-
-  if (!limiter) {
-    return { limited: false, retryAfter: 0 };
-  }
-
   const identifier = ip || "unknown";
-  const { success, reset } = await limiter.limit(identifier);
 
-  const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+  const key =
+    pathname.startsWith("/api/auth/")
+      ? "auth"
+      : pathname.startsWith("/api/admin/")
+        ? "admin"
+        : "api";
 
-  if (!success) {
-    return { limited: true, retryAfter };
+  const limit =
+    key === "auth" ? 10 : key === "admin" ? 60 : 30;
+
+  // Upstash подключён — используем его
+  const limiter =
+    key === "auth"
+      ? authLimiter
+      : key === "admin"
+        ? adminLimiter
+        : apiLimiter;
+
+  if (limiter) {
+    const { success, reset } = await limiter.limit(identifier);
+    const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+    return { limited: !success, retryAfter };
   }
 
-  return { limited: false, retryAfter: 0 };
+  // Fallback: in-memory (single-process VPS / локальная разработка)
+  return memoryLimit(`${key}|${identifier}`, limit, WINDOW_MS);
 }
