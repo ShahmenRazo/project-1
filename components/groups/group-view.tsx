@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, CreditCard, UserX } from "lucide-react";
+import { CheckCircle2, CreditCard, UserX, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/card";
 import { RemindButton } from "@/components/groups/remind-button";
 import { BalanceCalculator } from "@/components/groups/balance-calculator";
+import {
+  PaymentSheet,
+  type PayeeHandles,
+} from "@/components/groups/payment-sheet";
 import { formatMoney } from "@/lib/format";
 import { initials } from "@/lib/format";
 import { roundMoney } from "@/lib/utils";
@@ -53,6 +57,7 @@ export interface GroupViewProps {
   } | null;
   members: GroupViewMember[];
   payments: GroupViewPayment[];
+  payees?: Record<string, PayeeHandles>;
 }
 
 export function GroupView({
@@ -63,9 +68,14 @@ export function GroupView({
   subscription,
   members,
   payments,
+  payees = {},
 }: GroupViewProps) {
   const router = useRouter();
   const [payingIds, setPayingIds] = useState<Set<string>>(new Set());
+  const [paySheet, setPaySheet] = useState<GroupViewPayment | null>(null);
+
+  const payeeOf = (payment: GroupViewPayment): PayeeHandles | null =>
+    payees[payment.to_user_id] ?? null;
 
   const totalMonthly = useMemo(() => {
     if (!subscription) return 0;
@@ -186,12 +196,34 @@ export function GroupView({
                     </p>
                   </div>
 
-                  <Badge
-                    variant={owes > 0 ? "destructive" : "secondary"}
-                    className="tabular-nums"
-                  >
-                    {owes > 0 ? `Owes ${formatMoney(owes, currency)}` : "Paid"}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {owes > 0 && m.user_id === currentUserId && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="tap-active"
+                        onClick={() => {
+                          const debt = payments.find(
+                            (p) =>
+                              p.from_user_id === currentUserId &&
+                              payees[p.to_user_id]
+                          );
+                          if (debt) setPaySheet(debt);
+                        }}
+                      >
+                        <Receipt className="h-4 w-4" />
+                        Pay
+                      </Button>
+                    )}
+                    <Badge
+                      variant={owes > 0 ? "destructive" : "secondary"}
+                      className="tabular-nums"
+                    >
+                      {owes > 0
+                        ? `Owes ${formatMoney(owes, currency)}`
+                        : "Paid"}
+                    </Badge>
+                  </div>
                 </div>
               );
             })
@@ -221,14 +253,28 @@ export function GroupView({
                       {new Date(p.due_date).toLocaleDateString("en-US")}
                     </p>
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => markPaid(p.id)}
-                    disabled={paying}
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    {paying ? "Saving…" : "Mark as paid"}
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {payeeOf(p) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setPaySheet(p)}
+                        className="tap-active"
+                      >
+                        <Receipt className="h-4 w-4" />
+                        Pay
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      onClick={() => markPaid(p.id)}
+                      disabled={paying}
+                      className="tap-active"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      {paying ? "Saving…" : "Mark as paid"}
+                    </Button>
+                  </div>
                 </div>
               );
             })}
@@ -248,6 +294,17 @@ export function GroupView({
           </CardContent>
         </Card>
       )}
+
+      <PaymentSheet
+        open={paySheet !== null}
+        onClose={() => setPaySheet(null)}
+        payee={paySheet ? payeeOf(paySheet) : null}
+        amount={paySheet?.amount ?? 0}
+        currency={paySheet?.currency ?? currency}
+        groupId={groupId}
+        groupName={groupName}
+        fromUserId={currentUserId}
+      />
     </div>
   );
 }

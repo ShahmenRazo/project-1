@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { JoinGroupButton } from "@/components/groups/join-group-button";
+import { JoinAuthForm } from "@/components/join/join-auth-form";
 import { getPublicInviteInfo } from "@/lib/public-invites";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/format";
@@ -157,19 +158,15 @@ export default async function JoinPage({
                 )}
 
                 {user ? (
-                  <JoinGroupButton token={info.token} disabled={info.full} />
+                  <JoinGroupButton
+                    token={info.token}
+                    disabled={info.full}
+                    auto
+                    celebrate
+                  />
                 ) : (
                   <div className="space-y-2">
-                    <Button asChild className="w-full">
-                      <Link href={`/login?next=/join/${info.token}`}>
-                        Sign up and join
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href={`/login?next=/join/${info.token}`}>
-                        Log in and join
-                      </Link>
-                    </Button>
+                    <JoinAuthForm token={info.token} />
                   </div>
                 )}
               </CardContent>

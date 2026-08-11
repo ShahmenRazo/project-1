@@ -11,6 +11,7 @@ import type {
   GroupViewMember,
   GroupViewPayment,
 } from "@/components/groups/group-view";
+import type { PayeeHandles } from "@/components/groups/payment-sheet";
 
 export const dynamic = "force-dynamic";
 
@@ -70,16 +71,44 @@ export default async function GroupPage({
         .eq("status", "pending"),
     ]);
 
-  // Имена участников: таблица users закрыта RLS — читаем через admin client
+  // Имена участников и платёжные реквизиты: таблица users закрыта RLS —
+  // читаем через admin client
   const admin = createAdminClient();
+  const payeeIds = Array.from(
+    new Set((paymentRows ?? []).map((p) => p.to_user_id))
+  );
   const { data: profiles } = await admin
     .from("users")
-    .select("id, display_name, email, avatar_url")
-    .in("id", (memberRows ?? []).map((m) => m.user_id));
+    .select(
+      "id, display_name, email, avatar_url, username, venmo_username, cash_tag, zelle_email"
+    )
+    .in("id", [
+      ...new Set([
+        ...(memberRows ?? []).map((m) => m.user_id),
+        ...payeeIds,
+      ]),
+    ]);
 
   const profileById = new Map(
     (profiles ?? []).map((p) => [p.id, p])
   );
+
+  const payees: Record<string, PayeeHandles> = {};
+  for (const id of payeeIds) {
+    const profile = profileById.get(id);
+    if (!profile) continue;
+    payees[id] = {
+      user_id: id,
+      name:
+        profile.display_name ??
+        profile.email.split("@")[0] ??
+        "User",
+      username: profile.username ?? null,
+      venmo_username: profile.venmo_username ?? null,
+      cash_tag: profile.cash_tag ?? null,
+      zelle_email: profile.zelle_email ?? null,
+    };
+  }
 
   const members: GroupViewMember[] = (memberRows ?? []).map((m) => {
     const profile = profileById.get(m.user_id);
@@ -169,6 +198,7 @@ export default async function GroupPage({
           }
           members={members}
           payments={payments}
+          payees={payees}
         />
       </div>
     </AppShell>

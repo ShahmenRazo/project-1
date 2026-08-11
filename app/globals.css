@@ -58,3 +58,39 @@
     font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   }
 }
+
+@layer utilities {
+  /* Haptic-style touch feedback: лёгкое сжатие при тапе */
+  .tap-active {
+    transition: transform 150ms ease;
+  }
+  .tap-active:active {
+    transform: scale(0.97);
+  }
+  /* iPhone notch / home indicator */
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .pt-safe {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+}
+
+/* Конфетти при джойне группы */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(115vh) rotate(720deg);
+    opacity: 0.9;
+  }
+}
+.confetti-piece {
+  position: fixed;
+  top: -5vh;
+  z-index: 100;
+  pointer-events: none;
+  animation: confetti-fall linear forwards;
+}

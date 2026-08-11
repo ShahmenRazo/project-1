@@ -59,6 +59,9 @@ export interface Database {
           email: string;
           display_name: string | null;
           username: string | null;
+          venmo_username: string | null;
+          cash_tag: string | null;
+          zelle_email: string | null;
           avatar_url: string | null;
           subscription_tier: SubscriptionTier;
           ls_customer_id: string | null;
@@ -79,6 +82,9 @@ export interface Database {
           email: string;
           display_name?: string | null;
           username?: string | null;
+          venmo_username?: string | null;
+          cash_tag?: string | null;
+          zelle_email?: string | null;
           avatar_url?: string | null;
           subscription_tier?: SubscriptionTier;
           ls_customer_id?: string | null;
@@ -99,6 +105,9 @@ export interface Database {
           email?: string;
           display_name?: string | null;
           username?: string | null;
+          venmo_username?: string | null;
+          cash_tag?: string | null;
+          zelle_email?: string | null;
           avatar_url?: string | null;
           subscription_tier?: SubscriptionTier;
           ls_customer_id?: string | null;
@@ -263,7 +272,8 @@ export interface Database {
           to_user_id: string;
           amount: number;
           currency: string;
-          status: PaymentStatus;
+          status: PaymentStatus | "initiated";
+          method: string | null;
           due_date: string;
           paid_at: string | null;
           last_reminded_at: string | null;
@@ -276,7 +286,8 @@ export interface Database {
           to_user_id: string;
           amount: number;
           currency?: string;
-          status?: PaymentStatus;
+          status?: PaymentStatus | "initiated";
+          method?: string | null;
           due_date: string;
           paid_at?: string | null;
           last_reminded_at?: string | null;
@@ -289,7 +300,8 @@ export interface Database {
           to_user_id?: string;
           amount?: number;
           currency?: string;
-          status?: PaymentStatus;
+          status?: PaymentStatus | "initiated";
+          method?: string | null;
           due_date?: string;
           paid_at?: string | null;
           last_reminded_at?: string | null;

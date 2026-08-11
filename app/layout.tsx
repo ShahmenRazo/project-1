@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { PwaShell } from "@/components/layout/pwa-shell";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
@@ -63,9 +64,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#18181b",
+  themeColor: "#0f0f0f",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -78,6 +80,7 @@ export default function RootLayout({
       <body>
         <GoogleAnalytics />
         {children}
+        <PwaShell />
         <Footer />
         <CookieBanner />
         <Toaster richColors closeButton position="top-center" />
