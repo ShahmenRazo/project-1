@@ -399,6 +399,7 @@ export interface Database {
           type: NotificationType;
           message: string;
           read: boolean;
+          read_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -407,6 +408,7 @@ export interface Database {
           type: NotificationType;
           message: string;
           read?: boolean;
+          read_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -415,6 +417,7 @@ export interface Database {
           type?: NotificationType;
           message?: string;
           read?: boolean;
+          read_at?: string | null;
           created_at?: string;
         };
         Relationships: [

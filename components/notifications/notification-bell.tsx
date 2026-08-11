@@ -23,6 +23,7 @@ interface Notification {
   type: NotificationType;
   message: string;
   read: boolean;
+  read_at: string | null;
   created_at: string;
 }
 
@@ -63,6 +64,35 @@ export function NotificationBell() {
     const timer = setInterval(load, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [load]);
+
+  const markRead = async (id: string) => {
+    const notif = notifications.find((n) => n.id === id);
+    if (!notif || notif.read) return;
+
+    // Оптимистично помечаем прочитанным, откатываем при ошибке
+    const previous = notifications;
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true, read_at: new Date().toISOString() } : n))
+    );
+    setCount((c) => Math.max(0, c - 1));
+
+    try {
+      const res = await fetch(`/api/notifications/${id}`, { method: "PATCH" });
+      if (!res.ok) throw new Error();
+      const json = (await res.json().catch(() => null)) as {
+        data?: { notification?: Notification };
+      } | null;
+      const updated = json?.data?.notification;
+      if (updated) {
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, ...updated } : n))
+        );
+      }
+    } catch {
+      setNotifications(previous);
+      setCount((c) => c + 1);
+    }
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -110,8 +140,17 @@ export function NotificationBell() {
                 <div key={n.id}>
                   {i > 0 && <Separator />}
                   <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => void markRead(n.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        void markRead(n.id);
+                      }
+                    }}
                     className={cn(
-                      "flex gap-3 px-4 py-3 text-sm",
+                      "flex cursor-pointer gap-3 px-4 py-3 text-sm transition-colors hover:bg-accent/60 focus:outline-none focus-visible:bg-accent/60",
                       !n.read && "bg-accent/40"
                     )}
                   >
