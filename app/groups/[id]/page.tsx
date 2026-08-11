@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AppShell } from "@/components/layout/app-shell";
 import { GroupView } from "@/components/groups/group-view";
 import { InviteFriends } from "@/components/groups/invite-friends";
+import { SoloInviteBanner } from "@/components/groups/solo-invite-banner";
+import { getUserLimits } from "@/lib/billing/tier";
 import { roundMoney, shareAmount } from "@/lib/utils";
 import type {
   GroupViewMember,
@@ -108,6 +110,13 @@ export default async function GroupPage({
     100 - (memberRows ?? []).reduce((sum, m) => sum + (m.share_percent ?? 0), 0)
   );
 
+  const [{ max_group_members: maxMembers }] = await Promise.all([
+    getUserLimits(supabase, user.id),
+  ]);
+
+  const memberCount = members.length;
+  const canInvite = memberCount < maxMembers;
+
   return (
     <AppShell
       user={{
@@ -117,7 +126,14 @@ export default async function GroupPage({
       }}
     >
       <div className="mx-auto max-w-3xl space-y-4">
-        {isCreator && (
+        {isCreator && memberCount <= 1 && (
+          <SoloInviteBanner
+            groupId={group.id}
+            groupName={group.name}
+            subscriptionName={subscription?.name ?? null}
+          />
+        )}
+        {isCreator && canInvite && (
           <InviteFriends
             groupId={group.id}
             groupName={group.name}

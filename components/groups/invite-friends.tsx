@@ -1,18 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, Copy, Link2, Loader2, Mail, QrCode, Send, UserPlus } from "lucide-react";
+import { Check, Copy, Loader2, Mail, QrCode, UserPlus } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { ShareButtons } from "@/components/groups/ShareButtons";
 import { formatMoney } from "@/lib/format";
 import { trackEvent } from "@/lib/analytics";
@@ -26,8 +20,8 @@ interface InviteData {
 }
 
 /**
- * «Invite friends» — вкладки Link (по умолчанию), Email, QR.
- * Только для создателя группы.
+ * «Invite friends» — приглашение по email/username + публичная ссылка + QR.
+ * Виден создателю, пока в группе есть свободные места.
  */
 export function InviteFriends({
   groupId,
@@ -47,9 +41,9 @@ export function InviteFriends({
   const [invite, setInvite] = useState<InviteData | null>(null);
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [share, setShare] = useState(freeShare > 0 ? String(freeShare) : "");
+  const [target, setTarget] = useState("");
   const [sending, setSending] = useState(false);
 
   const loadInvite = useCallback(async () => {
@@ -115,26 +109,28 @@ export function InviteFriends({
     return `Join my${sub} on SubSplit${price}: ${l}`;
   };
 
-  async function sendEmailInvite() {
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      toast.error("Enter a valid email");
-      return;
-    }
-    const sharePercent = Number(share);
-    if (share === "" || Number.isNaN(sharePercent) || sharePercent <= 0) {
-      toast.error("Enter a valid share");
+  async function sendInvite() {
+    const value = target.trim();
+    if (!value) {
+      toast.error("Enter an email or username");
       return;
     }
     setSending(true);
     try {
+      const body: Record<string, unknown> = {
+        group_id: groupId,
+        share_percent: freeShare,
+      };
+      if (value.includes("@")) {
+        body.email = value;
+      } else {
+        body.username = value;
+      }
+
       const res = await fetch("/api/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          group_id: groupId,
-          email: email.trim(),
-          share_percent: sharePercent,
-        }),
+        body: JSON.stringify(body),
       });
       const json = (await res.json().catch(() => null)) as {
         data?: { email: string; link: string };
@@ -144,8 +140,8 @@ export function InviteFriends({
         toast.error(json?.error?.message ?? "Failed to send invite");
         return;
       }
-      setEmail("");
-      trackEvent("invite_sent", { method: "email" });
+      setTarget("");
+      trackEvent("invite_sent", { method: value.includes("@") ? "email" : "username" });
       if (json?.data?.link) {
         toast.success("Invite sent", {
           action: {
@@ -172,124 +168,98 @@ export function InviteFriends({
       <p className="mb-4 text-xs text-muted-foreground">
         Share the free share of the subscription with friends.
       </p>
-      <Tabs defaultValue="link">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="link">
-          <Link2 className="mr-1.5 h-4 w-4" />
-          Link
-        </TabsTrigger>
-        <TabsTrigger value="email">
-          <Mail className="mr-1.5 h-4 w-4" />
-          Email
-        </TabsTrigger>
-        <TabsTrigger value="qr">
-          <QrCode className="mr-1.5 h-4 w-4" />
-          QR
-        </TabsTrigger>
-      </TabsList>
 
-      <TabsContent value="link" className="space-y-3 pt-4">
-        {invite ? (
-          <>
-            <div className="flex gap-2">
-              <Input readOnly value={link} onFocus={(e) => e.target.select()} />
-              <Button variant="outline" size="icon" onClick={copyLink}>
-                {copied ? (
-                  <Check className="h-4 w-4 text-emerald-600" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
+      {freeShare > 0 && (
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                placeholder="Enter email or username"
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void sendInvite();
+                  }
+                }}
+                aria-label="Enter email or username"
+              />
             </div>
+            <Button onClick={() => void sendInvite()} disabled={sending}>
+              {sending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Mail className="mr-2 h-4 w-4" />
+              )}
+              Invite
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Share offered: {freeShare}%
+          </p>
+        </div>
+      )}
+
+      <div className="mt-4 space-y-3 border-t pt-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">Or share link</span>
+          {invite ? (
+            <>
+              <Button variant="outline" size="sm" onClick={copyLink}>
+                {copied ? (
+                  <Check className="mr-1.5 h-4 w-4 text-emerald-600" />
+                ) : (
+                  <Copy className="mr-1.5 h-4 w-4" />
+                )}
+                Copy link
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowQr((v) => !v)}
+              >
+                <QrCode className="mr-1.5 h-4 w-4" />
+                {showQr ? "Hide QR" : "Show QR"}
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={createInvite}
+              disabled={creating}
+            >
+              {creating && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+              Create link
+            </Button>
+          )}
+        </div>
+
+        {invite && (
+          <div className="space-y-3">
             <ShareButtons link={link} text={shareText(link)} />
             {invite.max_uses > 0 && (
               <p className="text-xs text-muted-foreground">
                 Used {invite.uses_count} of {invite.max_uses}
               </p>
             )}
-          </>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Create a link anyone can use to join the group and get the free
-              share of the subscription.
-            </p>
-            <Button onClick={createInvite} disabled={creating}>
-              {creating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Link2 className="mr-2 h-4 w-4" />
+            <div
+              className={cn(
+                "flex flex-col items-center gap-2 transition-all",
+                showQr ? "max-h-64 opacity-100" : "max-h-0 overflow-hidden opacity-0"
               )}
-              Create link
-            </Button>
-          </div>
-        )}
-      </TabsContent>
-
-      <TabsContent value="email" className="space-y-3 pt-4">
-        <p className="text-sm text-muted-foreground">
-          Send an invite to a friend&apos;s email. They will get a link to
-          claim their share.
-        </p>
-        <div className="space-y-2">
-          <Label htmlFor="invite-email">Email</Label>
-          <Input
-            id="invite-email"
-            type="email"
-            placeholder="friend@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="invite-share">
-            Share, % — free now: {freeShare}%
-          </Label>
-          <Input
-            id="invite-share"
-            type="number"
-            min={1}
-            max={freeShare}
-            value={share}
-            onChange={(e) => setShare(e.target.value)}
-          />
-        </div>
-        <Button onClick={sendEmailInvite} disabled={sending} className="w-full">
-          {sending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="mr-2 h-4 w-4" />
-          )}
-          Send invite
-        </Button>
-      </TabsContent>
-
-      <TabsContent value="qr" className="flex flex-col items-center gap-3 pt-4">
-        {invite ? (
-          <>
-            <div className="rounded-xl border p-4">
-              <QRCodeSVG value={link} size={180} level="M" />
+            >
+              <div className="rounded-xl border p-4">
+                <QRCodeSVG value={link} size={160} level="M" />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Scan with a phone camera to open the join page.
+              </p>
             </div>
-            <p className="text-center text-xs text-muted-foreground">
-              Scan with a phone camera to open the join page.
-            </p>
-            <ShareButtons link={link} text={shareText(link)} />
-          </>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Create a public link first to get a QR code.
-            </p>
-            <Button onClick={createInvite} disabled={creating}>
-              {creating && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Create link
-            </Button>
           </div>
         )}
-      </TabsContent>
-    </Tabs>
+      </div>
     </div>
   );
 }

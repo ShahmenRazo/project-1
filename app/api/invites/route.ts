@@ -2,17 +2,23 @@ import { NextRequest } from "next/server";
 import { randomBytes } from "crypto";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ApiError, fail, ok, parseBody, requireUser } from "@/lib/api";
 import { sendInviteEmail } from "@/lib/resend";
 import { roundMoney } from "@/lib/utils";
 
 const INVITE_TTL_DAYS = 7;
 
-const inviteByEmailSchema = z.object({
-  group_id: z.string().uuid(),
-  email: z.string().trim().email(),
-  share_percent: z.number().positive().max(100).multipleOf(0.01),
-});
+const inviteByEmailSchema = z
+  .object({
+    group_id: z.string().uuid(),
+    email: z.string().trim().email().optional(),
+    username: z.string().trim().min(1).max(40).optional(),
+    share_percent: z.number().positive().max(100).multipleOf(0.01),
+  })
+  .refine((v) => Boolean(v.email ?? v.username), {
+    message: "email or username is required",
+  });
 
 function inviteLink(token: string): string {
   const origin =
@@ -52,6 +58,30 @@ export async function POST(req: NextRequest) {
           .maybeSingle()
       : { data: null };
 
+    // Резолвим получателя: username -> существующий пользователь (его email),
+    // иначе ожидаем email.
+    let targetEmail = body.email ?? null;
+    if (body.username) {
+      const admin = createAdminClient();
+      const { data: target } = await admin
+        .from("users")
+        .select("email")
+        .ilike("username", body.username)
+        .maybeSingle();
+
+      if (!target) {
+        throw new ApiError(
+          404,
+          `No user with username "${body.username}" found`,
+          "USER_NOT_FOUND"
+        );
+      }
+      targetEmail = target.email;
+    }
+    if (!targetEmail) {
+      throw new ApiError(400, "email or username is required", "BAD_REQUEST");
+    }
+
     const { data: memberRows } = await supabase
       .from("group_members")
       .select("share_percent")
@@ -80,7 +110,7 @@ export async function POST(req: NextRequest) {
       .from("invites")
       .select("id, token")
       .eq("group_id", group.id)
-      .eq("email", body.email)
+      .eq("email", targetEmail)
       .eq("status", "pending")
       .maybeSingle();
 
@@ -95,7 +125,7 @@ export async function POST(req: NextRequest) {
       token = randomBytes(32).toString("hex");
       const { error: invError } = await supabase.from("invites").insert({
         group_id: group.id,
-        email: body.email,
+        email: targetEmail,
         token,
         share_percent: body.share_percent,
         expires_at: expiresAt,
@@ -105,7 +135,7 @@ export async function POST(req: NextRequest) {
 
     const link = inviteLink(token);
     const { sent } = await sendInviteEmail({
-      to: body.email,
+      to: targetEmail,
       groupName: group.name,
       subscriptionName: sub?.name ?? "",
       sharePercent: body.share_percent,
@@ -113,7 +143,7 @@ export async function POST(req: NextRequest) {
     });
 
     return ok(
-      { email: body.email, link: sent ? link : "" },
+      { email: targetEmail, link: sent ? link : "" },
       { status: 201 }
     );
   } catch (error) {

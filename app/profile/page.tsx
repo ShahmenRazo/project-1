@@ -15,7 +15,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("id, display_name, email, subscription_tier")
+    .select("id, display_name, email, username, subscription_tier")
     .eq("id", user.id)
     .single();
 
@@ -31,6 +31,7 @@ export default async function ProfilePage() {
         user={{
           display_name: profile?.display_name ?? null,
           email: profile?.email ?? user.email ?? "",
+          username: profile?.username ?? null,
           subscription_tier: profile?.subscription_tier ?? "free",
         }}
       />

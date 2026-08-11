@@ -58,6 +58,7 @@ export interface Database {
           id: string;
           email: string;
           display_name: string | null;
+          username: string | null;
           avatar_url: string | null;
           subscription_tier: SubscriptionTier;
           ls_customer_id: string | null;
@@ -77,6 +78,7 @@ export interface Database {
           id?: string;
           email: string;
           display_name?: string | null;
+          username?: string | null;
           avatar_url?: string | null;
           subscription_tier?: SubscriptionTier;
           ls_customer_id?: string | null;
@@ -96,6 +98,7 @@ export interface Database {
           id?: string;
           email?: string;
           display_name?: string | null;
+          username?: string | null;
           avatar_url?: string | null;
           subscription_tier?: SubscriptionTier;
           ls_customer_id?: string | null;

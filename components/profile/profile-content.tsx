@@ -3,7 +3,20 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CreditCard, Gem, LogOut, Mail, User as UserIcon } from "lucide-react";
+import {
+  AtSign,
+  Check,
+  CreditCard,
+  Gem,
+  Loader2,
+  LogOut,
+  Mail,
+  Pencil,
+  User as UserIcon,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
+import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,15 +26,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { createBrowserClientInstance } from "@/lib/supabase/client";
 
 export function ProfileContent({
   user,
 }: {
-  user: { display_name: string | null; email: string; subscription_tier: "free" | "pro" };
+  user: {
+    display_name: string | null;
+    email: string;
+    username: string | null;
+    subscription_tier: "free" | "pro";
+  };
 }) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
+
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [username, setUsername] = useState(user.username ?? "");
+  const [savingUsername, setSavingUsername] = useState(false);
 
   const handleSignOut = async () => {
     if (signingOut) return;
@@ -30,6 +53,36 @@ export function ProfileContent({
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
+  };
+
+  const saveUsername = async () => {
+    const value = username.trim();
+    if (!value) {
+      toast.error("Username is required");
+      return;
+    }
+    setSavingUsername(true);
+    try {
+      const res = await fetch("/api/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: value }),
+      });
+      const json = (await res.json().catch(() => null)) as {
+        error?: { message?: string };
+      } | null;
+      if (!res.ok) {
+        toast.error(await apiErrorMessageAsync(res, json?.error?.message ?? "Failed to save username"));
+        return;
+      }
+      toast.success("Username saved");
+      setEditingUsername(false);
+      router.refresh();
+    } catch {
+      toast.error("Network error, please try again");
+    } finally {
+      setSavingUsername(false);
+    }
   };
 
   return (
@@ -60,6 +113,72 @@ export function ProfileContent({
               <Mail className="h-3.5 w-3.5 shrink-0" />
               {user.email}
             </span>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">Username</span>
+            {editingUsername ? (
+              <div className="flex w-2/3 items-center gap-1.5">
+                <AtSign className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="yourname"
+                  className="h-8"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void saveUsername();
+                    if (e.key === "Escape") setEditingUsername(false);
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => void saveUsername()}
+                  disabled={savingUsername}
+                  aria-label="Save username"
+                >
+                  {savingUsername ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4 text-emerald-600" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => {
+                    setEditingUsername(false);
+                    setUsername(user.username ?? "");
+                  }}
+                  aria-label="Cancel"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="flex items-center gap-1.5 font-medium hover:underline"
+                onClick={() => setEditingUsername(true)}
+              >
+                {user.username ? (
+                  <>
+                    <AtSign className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    {user.username}
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">Set username</span>
+                )}
+                <Pencil className="h-3 w-3 text-muted-foreground" />
+              </button>
+            )}
+            {!editingUsername && (
+              <p className="text-xs text-muted-foreground">
+                Friends can invite you by username
+              </p>
+            )}
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-muted-foreground">Plan</span>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Users } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import {
   Select,
@@ -51,6 +52,7 @@ export function CreateGroupModal() {
     { email: "", share: "" },
   ]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [membersOpen, setMembersOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -151,6 +153,7 @@ export function CreateGroupModal() {
         }),
       });
       const json = (await res.json().catch(() => null)) as {
+        data?: { group?: { id: string }; invited?: { email: string }[] };
         error?: { message?: string };
       } | null;
 
@@ -159,11 +162,20 @@ export function CreateGroupModal() {
         return;
       }
 
-      toast.success("Group created, notifications sent to members");
+      const invitedCount = json?.data?.invited?.length ?? 0;
+      toast.success(
+        invitedCount > 0
+          ? "Group created, notifications sent to members"
+          : "Group created"
+      );
       trackEvent("create_group", { group_name: name.trim() });
       reset();
       setOpen(false);
-      router.refresh();
+      if (json?.data?.group?.id) {
+        router.push(`/groups/${json.data.group.id}`);
+      } else {
+        router.refresh();
+      }
     } catch {
       toast.error("Network error, please try again");
     } finally {
@@ -192,7 +204,7 @@ export function CreateGroupModal() {
         <DialogHeader>
           <DialogTitle>New group</DialogTitle>
           <DialogDescription>
-            Split a subscription with friends: add their email and share.
+            Pick a subscription and name the group — invite friends later.
           </DialogDescription>
         </DialogHeader>
 
@@ -241,70 +253,92 @@ export function CreateGroupModal() {
             )}
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Members (email and share)</Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={addMember}
-                disabled={members.length >= 10}
-              >
-                <Plus className="h-4 w-4" /> Add
-              </Button>
-            </div>
+          <div className="rounded-lg border">
+            <button
+              type="button"
+              onClick={() => setMembersOpen((v) => !v)}
+              className="flex w-full items-center justify-between px-3 py-2.5 text-sm font-medium hover:bg-accent/40"
+              aria-expanded={membersOpen}
+            >
+              <span className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                Invite friends (optional)
+              </span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-muted-foreground transition-transform",
+                  membersOpen && "rotate-180"
+                )}
+              />
+            </button>
 
-            {members.map((m, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <div className="flex-1 space-y-1">
-                  <Input
-                    type="email"
-                    placeholder="friend@example.com"
-                    value={m.email}
-                    onChange={(e) => setMember(i, "email", e.target.value)}
-                    aria-invalid={!!errors[`members.${i}.email`]}
-                  />
-                  {errors[`members.${i}.email`] && (
-                    <p className="text-xs text-destructive">
-                      {errors[`members.${i}.email`]}
-                    </p>
-                  )}
+            {membersOpen && (
+              <div className="space-y-3 border-t p-3">
+                <div className="flex items-center justify-between">
+                  <Label>Members (email and share)</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={addMember}
+                    disabled={members.length >= 10}
+                  >
+                    <Plus className="h-4 w-4" /> Add
+                  </Button>
                 </div>
-                <div className="w-24 space-y-1">
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    placeholder="%"
-                    value={m.share}
-                    onChange={(e) => setMember(i, "share", e.target.value)}
-                    aria-invalid={!!errors[`members.${i}.share`]}
-                  />
-                  {errors[`members.${i}.share`] && (
-                    <p className="text-xs text-destructive">
-                      {errors[`members.${i}.share`]}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
-                  onClick={() => removeMember(i)}
-                  disabled={members.length === 1}
-                  aria-label="Remove member"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+
+                {members.map((m, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Input
+                        type="email"
+                        placeholder="friend@example.com"
+                        value={m.email}
+                        onChange={(e) => setMember(i, "email", e.target.value)}
+                        aria-invalid={!!errors[`members.${i}.email`]}
+                      />
+                      {errors[`members.${i}.email`] && (
+                        <p className="text-xs text-destructive">
+                          {errors[`members.${i}.email`]}
+                        </p>
+                      )}
+                    </div>
+                    <div className="w-24 space-y-1">
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        placeholder="%"
+                        value={m.share}
+                        onChange={(e) => setMember(i, "share", e.target.value)}
+                        aria-invalid={!!errors[`members.${i}.share`]}
+                      />
+                      {errors[`members.${i}.share`] && (
+                        <p className="text-xs text-destructive">
+                          {errors[`members.${i}.share`]}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeMember(i)}
+                      disabled={members.length === 1}
+                      aria-label="Remove member"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+
+                {shareError && (
+                  <p className="text-xs text-destructive">{shareError}</p>
+                )}
               </div>
-            ))}
-
-            {shareError && (
-              <p className="text-xs text-destructive">{shareError}</p>
             )}
           </div>
 
