@@ -567,6 +567,18 @@ export interface Database {
         Args: { gid: string };
         Returns: boolean;
       };
+      admin_kpi: {
+        Args: Record<PropertyKey, never>;
+        Returns: unknown;
+      };
+      admin_cohorts: {
+        Args: Record<PropertyKey, never>;
+        Returns: unknown;
+      };
+      admin_funnel: {
+        Args: Record<PropertyKey, never>;
+        Returns: unknown;
+      };
     };
   };
 }

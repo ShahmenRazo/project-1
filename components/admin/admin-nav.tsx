@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CreditCard, Users, UsersRound } from "lucide-react";
+import { BarChart3, CreditCard, LineChart, Users, UsersRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: BarChart3, exact: true },
+  { href: "/admin/analytics", label: "Analytics", icon: LineChart, exact: false },
   { href: "/admin/users", label: "Users", icon: Users, exact: false },
   { href: "/admin/groups", label: "Groups", icon: UsersRound, exact: false },
   { href: "/admin/payments", label: "Payments", icon: CreditCard, exact: false },
