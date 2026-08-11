@@ -35,8 +35,9 @@ Vercel-деплою. Звёздочкой `(*)` отмечены шаги с п�
 | `CRON_SECRET` | Секрет для `/api/cron/*` (Bearer) |
 
 Опционально: `RESEND_API_KEY` / `RESEND_FROM` (письма-приглашения),
-`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (**rate limiting**; без них
-лимиты отключены), `NEXT_PUBLIC_GA_ID` (Google Analytics 4), firebase-переменные
+`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (распределённый rate
+limiting на несколько процессов; без них работает in-memory fallback для
+single-node VPS), `NEXT_PUBLIC_GA_ID` (Google Analytics 4), firebase-переменные
 (Push-уведомления), `NEXT_PUBLIC_ANALYTICS_SCRIPT_SRC` (Plausible/Umami).
 
 > Замечание: серверные секреты в `process.env` — в runtime `NEXT_PUBLIC_*`
@@ -48,10 +49,11 @@ Vercel-деплою. Звёздочкой `(*)` отмечены шаги с п�
       `/api/admin/*` — 60 req/min, `/api/billing/webhook` — без лимита.
 - [x] Ответ 429: `{ "error": { "message": "Too many requests", "code": "RATE_LIMITED" } }`
       + заголовок `Retry-After`.
-- [ ] **Включить Upstash** (бесплатный тир): `UPSTASH_REDIS_REST_URL` +
-      `UPSTASH_REDIS_REST_TOKEN` в `.env.local` → перезапуск сервиса.
-- [*] Проверка: `for i in $(seq 1 35); do curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/api/stats; done | sort | uniq -c`
-      — ожидается ~30×200 и ~5×429.
+- [x] Работает из коробки: Upstash при наличии
+      `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`, иначе in-memory
+      sliding window (одного процесса достаточно на single-node VPS).
+- [*] Проверка: `for i in $(seq 1 35); do curl -s -o /dev/null -w "%{http_code}\n" https://<domain>/api/stats; done | sort | uniq -c`
+      — ожидается 30×401 + 5×429.
 
 ## 4. Ошибки и юзер-экспириенс
 
