@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AppShell } from "@/components/layout/app-shell";
 import { GroupView } from "@/components/groups/group-view";
+import { InviteFriends } from "@/components/groups/invite-friends";
+import { roundMoney, shareAmount } from "@/lib/utils";
 import type {
   GroupViewMember,
   GroupViewPayment,
@@ -102,6 +104,10 @@ export default async function GroupPage({
     due_date: p.due_date,
   }));
 
+  const freeShare = roundMoney(
+    100 - (memberRows ?? []).reduce((sum, m) => sum + (m.share_percent ?? 0), 0)
+  );
+
   return (
     <AppShell
       user={{
@@ -110,7 +116,25 @@ export default async function GroupPage({
         subscription_tier: profile?.subscription_tier ?? "free",
       }}
     >
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-3xl space-y-4">
+        {isCreator && (
+          <InviteFriends
+            groupId={group.id}
+            groupName={group.name}
+            subscriptionName={subscription?.name ?? null}
+            shareMonthly={
+              subscription
+                ? shareAmount(
+                    subscription.price,
+                    Math.max(0, freeShare),
+                    subscription.billing_cycle
+                  )
+                : 0
+            }
+            currency={subscription?.currency ?? "USD"}
+            freeShare={freeShare}
+          />
+        )}
         <GroupView
           groupId={group.id}
           groupName={group.name}

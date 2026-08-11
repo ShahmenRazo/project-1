@@ -7,6 +7,8 @@ export interface PublicInviteInfo {
   group_id: string;
   group_name: string;
   creator_id: string;
+  /** Имя пригласившего (создатель ссылки) */
+  inviter_name: string | null;
   max_uses: number;
   uses_count: number;
   expires_at: string | null;
@@ -64,11 +66,20 @@ export async function getPublicInviteInfo(
         .maybeSingle()
     : { data: null };
 
+  const { data: inviter } = invite.created_by
+    ? await admin
+        .from("users")
+        .select("display_name")
+        .eq("id", invite.created_by)
+        .maybeSingle()
+    : { data: null };
+
   const base: PublicInviteInfo = {
     token: invite.token,
     group_id: invite.group_id,
     group_name: group.name,
     creator_id: group.creator_id,
+    inviter_name: inviter?.display_name ?? null,
     max_uses: invite.max_uses,
     uses_count: invite.uses_count,
     expires_at: invite.expires_at,

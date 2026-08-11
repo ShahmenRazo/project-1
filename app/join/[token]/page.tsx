@@ -114,6 +114,12 @@ export default async function JoinPage({
                         }`
                       : "No subscription"}
                   </p>
+                  {info.inviter_name && info.creator_id !== user?.id && (
+                    <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <ShieldCheck className="h-4 w-4" />
+                      Invited by {info.inviter_name}
+                    </p>
+                  )}
                   <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />
                     {info.member_count}{" "}
@@ -153,11 +159,18 @@ export default async function JoinPage({
                 {user ? (
                   <JoinGroupButton token={info.token} disabled={info.full} />
                 ) : (
-                  <Button asChild className="w-full">
-                    <Link href={`/login?next=/join/${info.token}`}>
-                      Sign up and join
-                    </Link>
-                  </Button>
+                  <div className="space-y-2">
+                    <Button asChild className="w-full">
+                      <Link href={`/login?next=/join/${info.token}`}>
+                        Sign up and join
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href={`/login?next=/join/${info.token}`}>
+                        Log in and join
+                      </Link>
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </>
