@@ -16,6 +16,15 @@ export function enableAnalytics(): void {
   const consent = getCookieConsent();
   if (!consent || !consent.analytics) return;
 
+  // GA4: обновляем Consent Mode v2 — пользователь дал согласие
+  const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+  w.gtag?.("consent", "update", {
+    ad_storage: "granted",
+    ad_user_data: "granted",
+    ad_personalization: "granted",
+    analytics_storage: "granted",
+  });
+
   const src = process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_SRC;
   if (!src) return;
 

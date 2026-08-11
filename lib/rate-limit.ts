@@ -31,6 +31,15 @@ const authLimiter = isConfigured
     })
   : null;
 
+// Расширенный лимит для /api/admin/* (частые запросы панели)
+const adminLimiter = isConfigured
+  ? new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(60, "1 m"),
+      prefix: "ratelimit:admin",
+    })
+  : null;
+
 export interface RateLimitResult {
   limited: boolean;
   /** Секунды до сброса лимита (для Retry-After) */
@@ -39,8 +48,8 @@ export interface RateLimitResult {
 
 /**
  * Проверка лимита для пути и IP.
- * Порядок приоритета: /api/auth/* (10/мин) → /api/billing/webhook (без лимита)
- * → остальные /api/* (30/мин).
+ * Порядок приоритета: /api/auth/* (10/мин) → /api/admin/* (60/мин) →
+ * /api/billing/webhook (без лимита) → остальные /api/* (30/мин).
  */
 export async function checkRateLimit(
   pathname: string,
@@ -51,8 +60,11 @@ export async function checkRateLimit(
     return { limited: false, retryAfter: 0 };
   }
 
-  const limiter =
-    pathname.startsWith("/api/auth/") ? authLimiter : apiLimiter;
+  const limiter = pathname.startsWith("/api/auth/")
+    ? authLimiter
+    : pathname.startsWith("/api/admin/")
+      ? adminLimiter
+      : apiLimiter;
 
   if (!limiter) {
     return { limited: false, retryAfter: 0 };

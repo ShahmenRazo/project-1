@@ -5,7 +5,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 /**
  * Защита роутов + rate limiting + обновление сессии Supabase:
  * - Rate limiting: /api/* — 30 req/min с одного IP, /api/auth/* — 10 req/min,
- *   /api/billing/webhook — без лимита (LemonSqueezy). 429 + Retry-After.
+ *   /api/admin/* — 60 req/min, /api/billing/webhook — без лимита (LemonSqueezy).
+ *   429 + Retry-After.
  * - /dashboard/*, /groups/*, /profile/* — только для авторизованных (иначе /login)
  * - /api/* — только для авторизованных (иначе 401 JSON);
  *   исключения: /api/billing/webhook (LemonSqueezy), /api/cron/* (Bearer CRON_SECRET),
@@ -32,7 +33,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json(
         {
           error: {
-            message: "Too many requests, slow down",
+            message: "Too many requests",
             code: "RATE_LIMITED",
           },
         },

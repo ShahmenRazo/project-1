@@ -1,12 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://kitstartai.com";
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -69,27 +68,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {GA_ID ? (
-          <>
-            <Script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script
-              id="gtag-init"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag() { dataLayer.push(arguments); }
-                  gtag("js", new Date());
-                  gtag("config", "${GA_ID}", { anonymize_ip: true });
-                `,
-              }}
-            />
-          </>
-        ) : null}
+        <GoogleAnalytics />
         {children}
         <Footer />
         <CookieBanner />

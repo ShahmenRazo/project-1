@@ -1,115 +1,121 @@
-# Деплой SubSplit на Vercel — пошаговая инструкция
+# SubSplit — Deployment Checklist
 
-Архитектура: Next.js 14 (App Router) на Vercel + Supabase (PostgreSQL, Auth, RLS) + LemonSqueezy (платежи) + Firebase Cloud Messaging (push).
+Полный чеклист развёртывания. Всё, кроме раздела «VPS», применимо и к
+Vercel-деплою. Звёздочкой `(*)` отмечены шаги с повторными проверками
+после деплоя.
 
----
+## 1. Supabase
 
-## 1. Env-переменные (все, что нужны)
+- [x] Поднят PostgreSQL + PostgREST + Auth (self-hosted Kong `http://127.0.0.1:8000`).
+- [x] Выполнены все миграции `supabase/migrations` (структура: profiles, groups,
+      memberships, payments, subscriptions, notifications, referral_codes, error_reports).
+- [x] **RLS включена** на всех таблицах; политики проверены:
+      - `profiles` — юзер видит только свой профиль;
+      - `groups` / `memberships` — только свои группы и членства;
+      - `payments` — только свои платежи (payable/receivable);
+      - `notifications` — только свои уведомления.
+- [x] Auth: email + password, redirect URL приложения настроен.
 
-| Переменная | Где взять | Где используется |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API | клиент/сервер |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | клиент/сервер |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API (Service role) | кросс-пользовательские операции (уведомления, cron) |
-| `LEMONSQUEEZY_API_KEY` | LemonSqueezy → Settings → API | создание checkout |
-| `LEMONSQUEEZY_STORE_ID` | LemonSqueezy → Settings → Store | checkout |
-| `LEMONSQUEEZY_PRO_VARIANT_ID` | LemonSqueezy → Products → Pro → Variants | checkout + проверка плана в вебхуке |
-| `LEMONSQUEEZY_WEBHOOK_SECRET` | LemonSqueezy → Settings → Webhooks | подпись вебхуков |
-| `NEXT_PUBLIC_APP_URL` | ваш домен, напр. `https://subsplit.app` | redirect после оплаты |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase → Project settings → Web app | клиент FCM |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase → Project settings | клиент + сервер |
-| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase → Project settings | клиент |
-| `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase → Project settings | клиент + service worker |
-| `NEXT_PUBLIC_FIREBASE_VAPID_KEY` | Firebase → Cloud Messaging → Web Push certificates | клиент (получение токена) |
-| `GOOGLE_SERVICE_ACCOUNT` | Firebase → Project settings → Service accounts → Generate new private key (JSON целиком) | сервер: отправка push (HTTP v1) |
-| `FIREBASE_PROJECT_ID` | тот же, что выше | сервер: отправка push |
-| `CRON_SECRET` | сгенерируйте: `openssl rand -hex 32` | защита `/api/cron/daily-reminders` |
+## 2. Переменные окружения
 
-> **Важно:** переменные без `NEXT_PUBLIC_` доступны только на сервере. Никогда не кладите `SUPABASE_SERVICE_ROLE_KEY`, `LEMONSQUEEZY_*`, `GOOGLE_SERVICE_ACCOUNT` в клиентский код.
+Скопировать `.env.example` → `.env.local` и заполнить. **Нужно 11 обязательных/ключевых:**
 
----
+| Переменная | Назначение |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Публичный URL Supabase (в браузере) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key (в браузере) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role (только server-side!) |
+| `SUPABASE_INTERNAL_URL` | Server-side адрес (self-hosted: `http://127.0.0.1:8000`) |
+| `NEXT_PUBLIC_APP_URL` | Абсолютный URL приложения (redirect после оплаты, письма) |
+| `LEMONSQUEEZY_API_KEY` | LemonSqueezy API key (checkout) |
+| `LEMONSQUEEZY_STORE_ID` | ID магазина LemonSqueezy |
+| `LEMONSQUEEZY_PRO_VARIANT_ID` | ID варианта Pro (месяц) |
+| `LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID` | ID варианта Pro (год) |
+| `LEMONSQUEEZY_WEBHOOK_SECRET` | Секрет вебхука (подпись `X-Signature`) |
+| `CRON_SECRET` | Секрет для `/api/cron/*` (Bearer) |
 
-## 2. Supabase
+Опционально: `RESEND_API_KEY` / `RESEND_FROM` (письма-приглашения),
+`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (**rate limiting**; без них
+лимиты отключены), `NEXT_PUBLIC_GA_ID` (Google Analytics 4), firebase-переменные
+(Push-уведомления), `NEXT_PUBLIC_ANALYTICS_SCRIPT_SRC` (Plausible/Umami).
 
-1. Создайте проект на [supabase.com](https://supabase.com) (регион — ближе к пользователям).
-2. **Схема БД:** откройте **SQL Editor** и выполните по очереди:
-   - `supabase/schema.sql` (таблицы, RLS, триггеры, view)
-   - `supabase/migrations/001_lemon_squeezy.sql` (колонки плана)
-   - `supabase/migrations/002_push_notifications.sql` (push_subscriptions, last_reminded_at)
-3. **Auth:**
-   - Authentication → Providers → Email: включите (доп. настройте SMTP для писем).
-   - Google: создайте OAuth-клиент в Google Cloud Console → укажите `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback` в Redirect URIs → вставьте Client ID/Secret в Supabase.
-   - Authentication → URL Configuration → Redirect URLs: добавьте `https://YOUR_DOMAIN/**` (и `http://localhost:3000/**` для разработки).
-4. RLS уже настроен в schema.sql — ничего включать вручную не нужно (но после деплоя проверьте: каждая таблица в Table Editor должна иметь «Row Level Security: ON»).
+> Замечание: серверные секреты в `process.env` — в runtime `NEXT_PUBLIC_*`
+> видны браузеру; service role key и webhook secret никогда не светить.
 
----
+## 3. Защита API (rate limiting)
 
-## 3. LemonSqueezy
+- [x] `middleware.ts`: `/api/*` — 30 req/min с IP, `/api/auth/*` — 10 req/min,
+      `/api/admin/*` — 60 req/min, `/api/billing/webhook` — без лимита.
+- [x] Ответ 429: `{ "error": { "message": "Too many requests", "code": "RATE_LIMITED" } }`
+      + заголовок `Retry-After`.
+- [ ] **Включить Upstash** (бесплатный тир): `UPSTASH_REDIS_REST_URL` +
+      `UPSTASH_REDIS_REST_TOKEN` в `.env.local` → перезапуск сервиса.
+- [*] Проверка: `for i in $(seq 1 35); do curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/api/stats; done | sort | uniq -c`
+      — ожидается ~30×200 и ~5×429.
 
-1. Зарегистрируйтесь на [lemonsqueezy.com](https://lemonsqueezy.com) → создайте магазин.
-2. **Продукт:** Products → New product «SubSplit Pro» → Variant «Pro Monthly», цена **$3.99/мес** (recurring). Скопируйте ID варианта (в URL /products/{id}/variants/{variantId}).
-3. **API key:** Settings → API → Generate API key.
-4. **Webhook:** Settings → Webhooks → Add webhook:
-   - URL: `https://YOUR_DOMAIN/api/billing/webhook`
-   - События: `subscription_created`, `subscription_updated`, `subscription_cancelled`, `subscription_resumed`, `subscription_expired`
-   - Скопируйте **Signing secret** → в `LEMONSQUEEZY_WEBHOOK_SECRET`.
-5. **Проверка:** на вкладке Webhooks есть «Send test webhook» — в логах Vercel должен появиться ответ `{"received":true}`.
+## 4. Ошибки и юзер-экспириенс
 
----
+- [x] `app/error.tsx` + `app/global-error.tsx` используют `ErrorFallback`
+      (reload, «Contact support», отправка стека в `/api/report-error`).
+- [x] Клиентские ошибки отображаются дружелюбно: 429 → «Too many requests…», 5xx →
+      «Something went wrong…» (`lib/client-errors.ts`).
+- [*] Проверка: открыть `/`, убить сети/бэкенда — страница показывает карточку
+      с кнопками вместо белого экрана.
 
-## 4. Firebase (push-уведомления)
+## 5. OG-изображение
 
-1. [console.firebase.google.com](https://console.firebase.google.com) → Add project (можно тот же проект, что у GCP, или отдельный).
-2. **Web-приложение:** Project settings → Your apps → Add app (Web) → скопируйте `apiKey`, `projectId`, `messagingSenderId`, `appId`.
-3. **VAPID key:** Build → Cloud Messaging → Web Push certificates → Generate key pair → скопируйте публичный ключ → `NEXT_PUBLIC_FIREBASE_VAPID_KEY`.
-4. **Service account:** Project settings → Service accounts → Generate new private key → скачайте JSON → вставьте целиком в `GOOGLE_SERVICE_ACCOUNT` (в Vercel можно вставить как multiline).
-5. **Проверка:** после деплоя откройте дашборд → кнопка «Push-уведомления» → разрешите → создайте группу → долг должен прийти push'ем и на iOS, и на Android (для iOS Safari требуется push-сертификат Web Push — см. Cloud Messaging → iOS apps).
+- [x] `GET /api/og` (edge runtime, `@vercel/og`) — 1200×630, градиент,
+      шрифты Inter 400/700/900.
+- [x] `metadataBase`, `openGraph` и `twitter` карточки в `app/layout.tsx` ссылаются
+      на `https://<domain>/api/og`.
+- [*] Проверка: `curl -sI https://<domain>/api/og` → `200`, `content-type: image/png`;
+      вставить URL в social debugger (og.gg / Twitter Card Validator).
 
-> Полезно: на вкладке Cloud Messaging есть «Test message» — отправьте на устройство, на котором уже получен токен.
+## 6. Домен и favicon
 
----
+- [x] Домен привязан к хостингу (DNS A/AAAA), HTTPS валиден (Let's Encrypt).
+- [x] `favicon.ico` (48px), `apple-touch-icon.png` (180px), иконки в `app/icons/`.
+- [*] Проверка: `curl -sI https://<domain>/favicon.ico` → `200`; favicon виден
+      во вкладке и на iOS home screen.
 
-## 5. Деплой на Vercel
+## 7. LemonSqueezy webhook
 
-1. Залейте проект в GitHub (git init, push).
-2. [vercel.com](https://vercel.com) → Add New → Project → импортируйте репозиторий. Vercel сам определит **Next.js** фреймворк.
-3. **Environment Variables:** добавьте ВСЕ переменные из таблицы п.1 (вкладка Settings → Environment Variables; можно добавить для Production/Preview/Development).
-4. Deploy. После сборки проверьте:
-   - `https://YOUR_DOMAIN/manifest.webmanifest` — отдаёт манифест;
-   - `https://YOUR_DOMAIN/sw.js` — service worker сгенерирован (workbox-* файлы рядом);
-   - `/icons/icon-192.png` и `/icons/icon-512.png` — отдаются.
-5. **Cron:** `vercel.json` уже содержит расписание `0 8 * * *` (ежедневно 08:00 UTC) для `/api/cron/daily-reminders`. На Hobby-тарифе Vercel разрешены 2 cron-джоба. Cron вызывает роут с заголовком `Authorization: Bearer <CRON_SECRET>`.
-   - Проверка: Settings → Cron Jobs → убедитесь, что джоб активен; или вызовите вручную: `curl -H "Authorization: Bearer $CRON_SECRET" https://YOUR_DOMAIN/api/cron/daily-reminders`.
+- [ ] В LemonSqueezy (Settings → Webhooks) указать URL:
+      `https://<domain>/api/billing/webhook` и подписаться на:
+      `subscription_created`, `subscription_updated`, `subscription_cancelled`,
+      `subscription_resumed`, `subscription_expired`.
+- [ ] `LEMONSQUEEZY_WEBHOOK_SECRET` совпадает с секретом вебхука.
+- [*] Проверка: подписка в тестовом режиме → в БД `subscriptions` появляется
+      запись, юзеру приходит уведомление.
 
----
+## 8. Аналитика (GA4)
 
-## 6. Домен
+- [ ] Создать GA4-проект, взять ID вида `G-XXXXXXXXXX` → `NEXT_PUBLIC_GA_ID`.
+- [x] `GoogleAnalytics.tsx` — gtag с Consent Mode v2 (default denied; granted
+      после «Accept all» в cookie-баннере).
+- [x] События: `sign_up` (метод email), `create_group`, `invite_sent`,
+      `pro_upgrade` (source: upsell/pricing).
+- [*] Проверка: включить GA Debug View (Preview), пройти регистрацию —
+      в debug-консоли видны `sign_up` и `create_group`.
 
-1. Vercel → Project → Settings → Domains → Add domain (`subsplit.app` и `www.subsplit.app`).
-2. У провайдера DNS добавьте:
-   - `A @ 76.76.21.21` (или `ALIAS` на `cname.vercel-dns.com`);
-   - `CNAME www cname.vercel-dns.com`.
-3. Дождитесь применения (Vercel покажет зелёный статус).
-4. **Обновите URL-зависимости:**
-   - `NEXT_PUBLIC_APP_URL` → `https://subsplit.app`;
-   - Supabase → URL Configuration → Redirect URLs → `https://subsplit.app/**`;
-   - LemonSqueezy → Settings → Domains → укажите ваш домен (чтобы checkout был на вашем домене);
-   - LemonSqueezy webhook URL → `https://subsplit.app/api/billing/webhook`.
+## 9. Фоновые задачи (cron)
 
----
+- [x] `vercel.json` объявляет: `/api/cron/daily-reminders` (08:00) и
+      `/api/cron/generate-payments` (09:00), защищены Bearer `CRON_SECRET`.
+- [ ] VPS-деплой: создать systemd timer на те же пути с заголовком
+      `Authorization: Bearer $CRON_SECRET`, либо вынести cron на Vercel.
 
-## 7. Чек-лист после деплоя
+## 10. VPS (текущий хостинг)
 
-- [ ] Регистрация email/Google работает, профиль создаётся автоматически
-- [ ] Создание подписки: на Free лимит 3 (4-я показывает upsell-модалку), после оплаты Pro — лимитов нет
-- [ ] Лимит группы: Free — 2 человека, Pro — 10
-- [ ] LemonSqueezy: оплата → `subscription_created` → тариф сменился на Pro (проверьте вебхук в LS-логах и таблицу users)
-- [ ] PWA: на iPhone Safari → Share → «На экран «Домой»; на Android Chrome — баннер установки
-- [ ] Push: кнопка «Push-уведомления» → разрешение → push при новом долге (приложение закрыто — системное уведомление, открыто — toast)
-- [ ] Cron: дёрните роут вручную с CRON_SECRET — должникам пришли напоминания
+- [x] Next.js 14.2 (Node 20+) на порту 3000, systemd-юнит `subsplit`, перезапуск
+      после `git pull` + `npm run build`.
+- [ ] Мониторинг: `journalctl -u subsplit -f`; алерты на 5xx.
+- [ ] Бэкап PostgreSQL (pg_dump nightly) — данные пользователей и платежей.
 
-## Известные ограничения
+## Финальная проверка
 
-- **iOS Safari push** требует отдельной настройки Web Push Certificate в Firebase (платный Apple Developer account).
-- `next-pwa` отключён в dev (`disable: process.env.NODE_ENV === "development"`) — PWA и FCM проверяются на production-сборке (`npm run build && npm start`).
-- Если иконки не нравятся — перегенерируйте: `node scripts/generate-icons.mjs` (чистый Node, без зависимостей).
+- [ ] `npm run build` и `npx tsc --noEmit` без ошибок.
+- [ ] `/` и `/login` открываются, регистрация + логин работают.
+- [ ] `https://<domain>/api/og` возвращает PNG 1200×630.
+- [ ] 429 срабатывает после 30 запросов к `/api/*` за минуту.
+- [ ] Cookie-баннер: «Accept all» включает аналитику (gtag `consent: granted`).
