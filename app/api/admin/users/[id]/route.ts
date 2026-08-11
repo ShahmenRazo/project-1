@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin, adminErrorResponse } from "@/lib/admin/guard";
+import { logAdminAction, requestIp } from "@/lib/admin/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -129,7 +130,7 @@ export async function GET(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -148,7 +149,7 @@ export async function DELETE(
     // Проверяем, что пользователь существует
     const { data: existing, error: checkError } = await admin
       .from("users")
-      .select("id")
+      .select("id, email")
       .eq("id", id)
       .maybeSingle();
     if (checkError) throw checkError;
@@ -159,10 +160,20 @@ export async function DELETE(
       );
     }
 
-    // GoTrue admin API: удаляет auth.users, каскадно чистит public.users,
-    // subscriptions, groups, group_members, payments, notifications
-    const { error: deleteError } = await admin.auth.admin.deleteUser(id);
+    // GDPR hard delete: RPC удаляет все связанные данные + auth.users
+    const { error: deleteError } = await admin.rpc("admin_hard_delete_user", {
+      p_uid: id,
+    });
     if (deleteError) throw deleteError;
+
+    await logAdminAction(
+      actor.id,
+      "delete_user",
+      id,
+      existing.email,
+      {},
+      requestIp(req)
+    );
 
     return Response.json({ data: { deleted: true } });
   } catch (err) {

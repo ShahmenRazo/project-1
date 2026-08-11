@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Copy, KeyRound, Link2, Trash2 } from "lucide-react";
+import { Copy, KeyRound, Link2, RotateCcw, Ban, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ interface UserDetail {
     subscription_tier: "free" | "pro";
     plan_status: string | null;
     role: "user" | "admin";
+    banned: boolean;
     country: string | null;
     last_active: string | null;
     created_at: string;
@@ -174,6 +175,41 @@ export default function AdminUserDetailPage() {
   }
 
   const [togglingPro, setTogglingPro] = useState(false);
+  const [banning, setBanning] = useState(false);
+
+  async function handleToggleBan() {
+    if (!detail) return;
+    const banned = detail.profile.banned;
+    if (
+      !banned &&
+      !window.confirm(`Ban ${detail.profile.email}? They will be blocked from signing in.`)
+    ) {
+      return;
+    }
+    setBanning(true);
+    try {
+      const res = await fetch(
+        `/api/admin/users/${params.id}/${banned ? "unban" : "ban"}`,
+        { method: "POST" }
+      );
+      const json = (await res.json().catch(() => null)) as {
+        error?: { message?: string };
+      } | null;
+      if (!res.ok) {
+        toast.error(json?.error?.message ?? "Failed to update ban status");
+        return;
+      }
+      setDetail({
+        ...detail,
+        profile: { ...detail.profile, banned: !banned },
+      });
+      toast.success(banned ? "User unbanned" : "User banned");
+    } catch {
+      toast.error("Network error, please try again");
+    } finally {
+      setBanning(false);
+    }
+  }
 
   async function handleTogglePro() {
     if (!detail) return;
@@ -238,6 +274,17 @@ export default function AdminUserDetailPage() {
           <Button variant="outline" onClick={handleImpersonate} disabled={impersonating}>
             <KeyRound className="h-4 w-4" />
             {impersonating ? "Generating…" : "Impersonate"}
+          </Button>
+          <Button
+            variant={p.banned ? "outline" : "destructive"}
+            onClick={handleToggleBan}
+            disabled={banning}
+          >
+            {p.banned ? (
+              <><RotateCcw className="h-4 w-4" />Unban</>
+            ) : (
+              <><Ban className="h-4 w-4" />Ban</>
+            )}
           </Button>
           <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
             <Trash2 className="h-4 w-4" /> Delete account

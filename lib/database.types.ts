@@ -42,6 +42,7 @@ export interface Database {
           plan_status: string;
           plan_expires_at: string | null;
           role: "user" | "admin";
+          banned: boolean;
           last_active: string | null;
           country: string | null;
           created_at: string;
@@ -59,6 +60,7 @@ export interface Database {
           plan_status?: string;
           plan_expires_at?: string | null;
           role?: "user" | "admin";
+          banned?: boolean;
           last_active?: string | null;
           country?: string | null;
           created_at?: string;
@@ -76,6 +78,7 @@ export interface Database {
           plan_status?: string;
           plan_expires_at?: string | null;
           role?: "user" | "admin";
+          banned?: boolean;
           last_active?: string | null;
           country?: string | null;
           created_at?: string;
@@ -543,6 +546,87 @@ export interface Database {
           }
         ];
       };
+    ls_orders: {
+      Row: {
+        id: string;
+        user_id: string | null;
+        email: string | null;
+        amount: number;
+        currency: string;
+        status: "succeeded" | "failed" | "refunded";
+        payment_method: string;
+        invoice_id: string | null;
+        ls_order_id: string | null;
+        created_at: string;
+      };
+      Insert: {
+        id?: string;
+        user_id?: string | null;
+        email?: string | null;
+        amount: number;
+        currency?: string;
+        status?: "succeeded" | "failed" | "refunded";
+        payment_method?: string;
+        invoice_id?: string | null;
+        ls_order_id?: string | null;
+        created_at?: string;
+      };
+      Update: {
+        id?: string;
+        user_id?: string | null;
+        email?: string | null;
+        amount?: number;
+        currency?: string;
+        status?: "succeeded" | "failed" | "refunded";
+        payment_method?: string;
+        invoice_id?: string | null;
+        ls_order_id?: string | null;
+        created_at?: string;
+      };
+      Relationships: [];
+    };
+    admin_logs: {
+      Row: {
+        id: string;
+        user_id: string | null;
+        action: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro";
+        target_id: string | null;
+        target_email: string | null;
+        metadata: Record<string, unknown>;
+        ip_address: string | null;
+        created_at: string;
+      };
+      Insert: {
+        id?: string;
+        user_id?: string | null;
+        action: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro";
+        target_id?: string | null;
+        target_email?: string | null;
+        metadata?: Record<string, unknown>;
+        ip_address?: string | null;
+        created_at?: string;
+      };
+      Update: {
+        id?: string;
+        user_id?: string | null;
+        action?: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro";
+        target_id?: string | null;
+        target_email?: string | null;
+        metadata?: Record<string, unknown>;
+        ip_address?: string | null;
+        created_at?: string;
+      };
+      Relationships: [
+        {
+          foreignKeyName: "admin_logs_user_id_fkey";
+          columns: ["user_id"];
+          isOneToOne: false;
+          referencedRelation: "users";
+          referencedColumns: ["id"];
+        }
+      ];
+    };
+
     };
     Views: {
       group_balances: {
@@ -566,6 +650,10 @@ export interface Database {
       is_group_creator: {
         Args: { gid: string };
         Returns: boolean;
+      };
+      admin_hard_delete_user: {
+        Args: { p_uid: string };
+        Returns: undefined;
       };
       admin_kpi: {
         Args: Record<PropertyKey, never>;

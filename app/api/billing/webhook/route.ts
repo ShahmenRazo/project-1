@@ -116,6 +116,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 
+  // --- 4b. Финансы: записываем Pro-оплату (ls_orders) при создании/продлении ---
+  if (tier === "pro" && event === "subscription_created") {
+    const yearly =
+      variantId != null &&
+      String(variantId) === (process.env.LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID ?? "");
+    const amount = yearly ? 39.99 : 3.99;
+
+    const { error: orderError } = await admin.from("ls_orders").insert({
+      user_id: userId,
+      email: (payload.meta?.custom_data as { email?: string } | null | undefined)?.email ?? null,
+      amount,
+      currency: "USD",
+      status: "succeeded",
+      payment_method: "LemonSqueezy",
+      invoice_id: (attributes as Record<string, unknown>).invoice_id
+        ? String((attributes as Record<string, unknown>).invoice_id)
+        : null,
+      ls_order_id: subscriptionId ? String(subscriptionId) : null,
+    });
+    if (orderError) {
+      console.error("[billing] webhook: failed to record ls_order", orderError);
+    }
+  }
+
   // --- 5. Реферальный бонус: при первой покупке Pro приглашённым
   // оба (он и пригласивший) получают +1 месяц Pro ---
   if (tier === "pro" && event === "subscription_created") {

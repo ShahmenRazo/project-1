@@ -19,15 +19,29 @@ export async function GET(req: NextRequest) {
       Math.max(1, Number(params.get("pageSize") ?? String(DEFAULT_PAGE_SIZE)) || DEFAULT_PAGE_SIZE)
     );
     const q = (params.get("q") ?? "").trim();
+    const plan = (params.get("plan") ?? "").trim();
+    const status = (params.get("status") ?? "").trim();
+    const days = Number(params.get("days") ?? "0") || 0;
 
     let query = admin
       .from("users")
-      .select("id, email, display_name, subscription_tier, plan_status, role, created_at, last_active, country", {
+      .select("id, email, display_name, subscription_tier, plan_status, role, banned, created_at, last_active, country", {
         count: "exact",
       });
 
     if (q) {
       query = query.ilike("email", `%${q}%`);
+    }
+    if (plan === "free" || plan === "pro") {
+      query = query.eq("subscription_tier", plan);
+    }
+    if (status === "active") {
+      query = query.eq("banned", false);
+    } else if (status === "banned") {
+      query = query.eq("banned", true);
+    }
+    if (days > 0) {
+      query = query.gte("created_at", new Date(Date.now() - days * 86400000).toISOString());
     }
 
     const from = (page - 1) * pageSize;
@@ -39,8 +53,8 @@ export async function GET(req: NextRequest) {
 
     const userIds = data.map((u) => u.id);
 
-    // Счётчики: подписки и группы для каждой строки
-    const [subsRes, gmRes] = await Promise.all([
+    // Счётчики: подписки и группы для каждой строки + сумма платежей (revenue)
+    const [subsRes, gmRes, revRes] = await Promise.all([
       admin
         .from("subscriptions")
         .select("user_id")
@@ -50,19 +64,30 @@ export async function GET(req: NextRequest) {
         .from("group_members")
         .select("user_id, group_id")
         .in("user_id", userIds),
+      admin
+        .from("ls_orders")
+        .select("user_id, amount")
+        .eq("status", "succeeded")
+        .in("user_id", userIds),
     ]);
     if (subsRes.error) throw subsRes.error;
     if (gmRes.error) throw gmRes.error;
+    if (revRes.error) throw revRes.error;
 
     const subsCount = new Map<string, number>();
     for (const s of subsRes.data) subsCount.set(s.user_id, (subsCount.get(s.user_id) ?? 0) + 1);
     const groupsCount = new Map<string, number>();
     for (const gm of gmRes.data) groupsCount.set(gm.user_id, (groupsCount.get(gm.user_id) ?? 0) + 1);
+    const revenue = new Map<string, number>();
+    for (const o of revRes.data)
+      if (o.user_id)
+        revenue.set(o.user_id, (revenue.get(o.user_id) ?? 0) + Number(o.amount));
 
     const users = data.map((u) => ({
       ...u,
       subscriptions_count: subsCount.get(u.id) ?? 0,
       groups_count: groupsCount.get(u.id) ?? 0,
+      revenue: Math.round((revenue.get(u.id) ?? 0) * 100) / 100,
     }));
 
     return Response.json({
