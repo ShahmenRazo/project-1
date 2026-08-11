@@ -29,6 +29,30 @@ export type NotificationType =
 export interface Database {
   public: {
     Tables: {
+    feature_flags: {
+      Row: {
+        name: string;
+        enabled: boolean;
+        rollout_percent: number;
+        target: "all" | "pro_only" | "beta_users";
+        created_at: string;
+      };
+      Insert: {
+        name: string;
+        enabled?: boolean;
+        rollout_percent?: number;
+        target?: "all" | "pro_only" | "beta_users";
+        created_at?: string;
+      };
+      Update: {
+        name?: string;
+        enabled?: boolean;
+        rollout_percent?: number;
+        target?: "all" | "pro_only" | "beta_users";
+        created_at?: string;
+      };
+      Relationships: [];
+    };
       users: {
         Row: {
           id: string;
@@ -43,6 +67,7 @@ export interface Database {
           plan_expires_at: string | null;
           role: "user" | "admin";
           banned: boolean;
+          is_beta: boolean;
           last_active: string | null;
           country: string | null;
           created_at: string;
@@ -61,6 +86,7 @@ export interface Database {
           plan_expires_at?: string | null;
           role?: "user" | "admin";
           banned?: boolean;
+          is_beta?: boolean;
           last_active?: string | null;
           country?: string | null;
           created_at?: string;
@@ -79,6 +105,7 @@ export interface Database {
           plan_expires_at?: string | null;
           role?: "user" | "admin";
           banned?: boolean;
+          is_beta?: boolean;
           last_active?: string | null;
           country?: string | null;
           created_at?: string;
@@ -589,7 +616,7 @@ export interface Database {
       Row: {
         id: string;
         user_id: string | null;
-        action: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro";
+        action: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro" | "flag_create" | "flag_update" | "flag_delete";
         target_id: string | null;
         target_email: string | null;
         metadata: Record<string, unknown>;
@@ -599,7 +626,7 @@ export interface Database {
       Insert: {
         id?: string;
         user_id?: string | null;
-        action: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro";
+        action: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro" | "flag_create" | "flag_update" | "flag_delete";
         target_id?: string | null;
         target_email?: string | null;
         metadata?: Record<string, unknown>;
@@ -609,7 +636,7 @@ export interface Database {
       Update: {
         id?: string;
         user_id?: string | null;
-        action?: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro";
+        action?: "ban_user" | "unban_user" | "delete_user" | "impersonate" | "refund" | "toggle_pro" | "flag_create" | "flag_update" | "flag_delete";
         target_id?: string | null;
         target_email?: string | null;
         metadata?: Record<string, unknown>;

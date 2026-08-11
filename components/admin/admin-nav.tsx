@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   CreditCard,
+  Flag,
   LineChart,
   ScrollText,
   Users,
@@ -20,6 +21,7 @@ const NAV = [
   { href: "/admin/groups", label: "Groups", icon: UsersRound, exact: false },
   { href: "/admin/payments", label: "Payments", icon: CreditCard, exact: false },
   { href: "/admin/finance", label: "Finance", icon: Wallet, exact: false },
+  { href: "/admin/features", label: "Features", icon: Flag, exact: false },
   { href: "/admin/audit", label: "Audit Log", icon: ScrollText, exact: false },
 ];
 

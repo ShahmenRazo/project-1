@@ -7,7 +7,10 @@ export type AdminAction =
   | "delete_user"
   | "impersonate"
   | "refund"
-  | "toggle_pro";
+  | "toggle_pro"
+  | "flag_create"
+  | "flag_update"
+  | "flag_delete";
 
 /**
  * Запись действия админа в admin_logs (audit log).

@@ -50,6 +50,7 @@ interface AdminUser {
   plan_status: string;
   role: "user" | "admin";
   banned: boolean;
+  is_beta: boolean;
   created_at: string;
   last_active: string | null;
   subscriptions_count: number;
@@ -322,6 +323,11 @@ export default function AdminUsersPage() {
                       ) : (
                         <Badge variant="outline" className="text-emerald-600">
                           Active
+                        </Badge>
+                      )}
+                      {u.is_beta && (
+                        <Badge className="ml-1.5 bg-violet-100 text-violet-700">
+                          Beta
                         </Badge>
                       )}
                     </TableCell>

@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     let query = admin
       .from("users")
-      .select("id, email, display_name, subscription_tier, plan_status, role, banned, created_at, last_active, country", {
+      .select("id, email, display_name, subscription_tier, plan_status, role, banned, is_beta, created_at, last_active, country", {
         count: "exact",
       });
 
