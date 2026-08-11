@@ -10,14 +10,14 @@ const COPY = {
       links: [
         { label: "Features", href: "/#how-it-works" },
         { label: "Pricing", href: "/pricing" },
-        { label: "FAQ", href: "/#faq" },
+        { label: "FAQ", href: "/faq" },
       ],
     },
     {
       title: "Company",
       links: [
-        { label: "Blog", href: "#" },
-        { label: "Contact", href: "#" },
+        { label: "Blog", href: "/blog" },
+        { label: "Contact", href: "mailto:support@kitstartai.com" },
       ],
     },
     {
@@ -110,21 +110,27 @@ export function Footer() {
           <p className="text-sm">{COPY.copyright}</p>
           <div className="flex items-center gap-4">
             <a
-              href="#"
+              href="https://x.com/subsplit"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="X (Twitter)"
               className="transition-colors hover:text-white"
             >
               <TwitterIcon className="h-4 w-4" />
             </a>
             <a
-              href="#"
+              href="https://www.tiktok.com/@subsplit"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="TikTok"
               className="transition-colors hover:text-white"
             >
               <TikTokIcon className="h-4 w-4" />
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/subsplit"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Instagram"
               className="transition-colors hover:text-white"
             >

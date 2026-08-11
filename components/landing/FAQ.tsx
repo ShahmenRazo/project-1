@@ -1,33 +1,12 @@
 import { HelpCircle } from "lucide-react";
+import Link from "next/link";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-const FAQ_ITEMS = [
-  {
-    q: "How do my friends actually pay me back?",
-    a: "SubSplit tracks who owes what. Your friends pay you back via Venmo, Cash App, Zelle, or PayPal — whatever you already use.",
-  },
-  {
-    q: "Is my subscription data secure?",
-    a: "Yes. We use bank-level encryption. We never store your streaming passwords.",
-  },
-  {
-    q: "What if a friend doesn't pay?",
-    a: "We'll remind them nicely at first, then with memes. You can also remove them from the group.",
-  },
-  {
-    q: "Can I cancel Pro anytime?",
-    a: "Absolutely. Cancel in one click, no questions asked.",
-  },
-  {
-    q: "Do you handle the actual money transfer?",
-    a: "No — we only track and remind. You keep using your favorite payment app.",
-  },
-] as const;
+import { FAQ_ITEMS } from "@/lib/faq";
 
 /** FAQ-аккордеон на лендинге */
 export function FAQ() {
@@ -52,6 +31,18 @@ export function FAQ() {
             </AccordionItem>
           ))}
         </Accordion>
+
+        <div className="mt-10 text-center text-sm text-muted-foreground">
+          Still have questions? Check{" "}
+          <Link href="/blog" className="font-medium text-foreground underline underline-offset-4 hover:text-primary">
+            our blog
+          </Link>{" "}
+          or see{" "}
+          <Link href="/pricing" className="font-medium text-foreground underline underline-offset-4 hover:text-primary">
+            pricing plans
+          </Link>{" "}
+          to get started.
+        </div>
       </div>
     </section>
   );

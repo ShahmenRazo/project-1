@@ -13,6 +13,13 @@ import {
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Sign In — SubSplit",
+  description:
+    "Sign in to SubSplit and split Netflix, Spotify and ChatGPT costs with friends — automatic reminders, no awkward money talks.",
+  alternates: { canonical: "/login" },
+};
+
 export default async function LoginPage({
   searchParams,
 }: {

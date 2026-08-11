@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
@@ -7,14 +8,21 @@ import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://kitstartai.com";
 
+// Inter с display: swap — нет layout shift при загрузке шрифта
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "SubSplit — Split subscriptions, not friendships",
-    template: "%s — SubSplit",
+    default: "SubSplit — Split Subscriptions with Friends | Save $500+/Year",
+    template: "%s",
   },
   description:
-    "Share Netflix, Spotify, ChatGPT costs automatically. No awkward texts.",
+    "Split Netflix, Spotify & ChatGPT costs with roommates automatically. SubSplit tracks who owes what and sends reminders — save $500+/year. Free to start.",
   manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
@@ -32,24 +40,24 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: "SubSplit",
-    title: "SubSplit — Split subscriptions, not friendships",
+    title: "SubSplit — Split Subscriptions with Friends | Save $500+/Year",
     description:
-      "Share Netflix, Spotify, ChatGPT costs automatically. No awkward texts.",
+      "Split Netflix, Spotify & ChatGPT costs with roommates automatically. SubSplit tracks who owes what and sends reminders — save $500+/year. Free to start.",
     locale: "en_US",
     images: [
       {
         url: `${SITE_URL}/api/og`,
         width: 1200,
         height: 630,
-        alt: "SubSplit — Split subscriptions, not friendships",
+        alt: "SubSplit — Split Subscriptions with Friends",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SubSplit — Split subscriptions, not friendships",
+    title: "SubSplit — Split Subscriptions with Friends | Save $500+/Year",
     description:
-      "Share Netflix, Spotify, ChatGPT costs automatically. No awkward texts.",
+      "Split Netflix, Spotify & ChatGPT costs with roommates automatically. SubSplit tracks who owes what and sends reminders — save $500+/year. Free to start.",
     images: [`${SITE_URL}/api/og`],
   },
 };
@@ -66,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body>
         <GoogleAnalytics />
         {children}

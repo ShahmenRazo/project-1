@@ -19,6 +19,8 @@ import { FAQ } from "@/components/landing/FAQ";
 import { BeforeAfter } from "@/components/landing/BeforeAfter";
 import { VideoPlaceholder } from "@/components/landing/VideoPlaceholder";
 import { TrustBadges } from "@/components/trust/TrustBadges";
+import { SeoSections } from "@/components/landing/SeoSections";
+import { jsonLd, ORGANIZATION_SCHEMA, softwareApplicationSchema } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +83,9 @@ const COPY = {
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
+      {jsonLd(ORGANIZATION_SCHEMA)}
+      {jsonLd(softwareApplicationSchema())}
+
       <header className="border-b">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold">
@@ -224,6 +229,9 @@ export default function LandingPage() {
 
       {/* Available everywhere */}
       <AvailableEverywhere />
+
+      {/* SEO-контент: ключевые запросы */}
+      <SeoSections />
 
       {/* FAQ */}
       <FAQ />

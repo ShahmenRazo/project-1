@@ -2,9 +2,30 @@ import Link from "next/link";
 import { CreditCard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PricingPage } from "@/components/billing/pricing-page";
+import { jsonLd, ORGANIZATION_SCHEMA } from "@/lib/seo";
 import type { SubscriptionTier } from "@/lib/database.types";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "SubSplit Pricing — Free & Pro Plans",
+  description:
+    "SubSplit is free to start. Pro costs $3.99/month for unlimited groups, automatic reminders and payment history. Cancel anytime.",
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "SubSplit Pricing — Free & Pro Plans",
+    description:
+      "SubSplit is free to start. Pro costs $3.99/month for unlimited groups, automatic reminders and payment history. Cancel anytime.",
+    url: "/pricing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SubSplit Pricing — Free & Pro Plans",
+    description:
+      "SubSplit is free to start. Pro costs $3.99/month for unlimited groups, automatic reminders and payment history. Cancel anytime.",
+  },
+};
 
 export default async function PricingPageRoute({
   searchParams,
@@ -37,6 +58,8 @@ export default async function PricingPageRoute({
 
   return (
     <div className="min-h-screen">
+      {jsonLd(ORGANIZATION_SCHEMA)}
+
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold">
