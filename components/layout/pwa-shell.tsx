@@ -13,22 +13,14 @@ type BeforeInstallPromptEvent = Event & {
 
 /**
  * PWA-обвязка (client):
- * 1) Регистрирует service worker (кроме localhost — чтобы не кешировать дев).
- * 2) Предлагает «Add to Home Screen» после 2-го визита на мобильном:
- *    - Android/Chrome — через beforeinstallprompt,
- *    - iOS Safari — короткая инструкция.
+ * — SW регистрирует next-pwa (register: true, см. next.config.mjs),
+ *   здесь только «Add to Home Screen» после 2-го визита на мобильном:
+ *   Android/Chrome — через beforeinstallprompt, iOS Safari — инструкция.
  */
 export function PwaShell() {
   const [installEvent, setInstallEvent] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
-    if (!("serviceWorker" in navigator)) return;
-    const host = window.location.hostname;
-    if (host === "localhost" || host === "127.0.0.1") return;
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
-  }, []);
 
   useEffect(() => {
     try {
