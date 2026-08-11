@@ -21,9 +21,11 @@ import type { DashboardGroup } from "@/lib/types";
 export function GroupsSection({
   groups,
   loading,
+  createDisabled = false,
 }: {
   groups: DashboardGroup[];
   loading?: boolean;
+  createDisabled?: boolean;
 }) {
   return (
     <div className="space-y-4">
@@ -34,7 +36,7 @@ export function GroupsSection({
             Split subscriptions and track debts
           </p>
         </div>
-        <CreateGroupModal />
+        <CreateGroupModal disabled={createDisabled} />
       </div>
 
       {loading ? (
@@ -57,7 +59,7 @@ export function GroupsSection({
           icon={Users}
           title="No groups yet"
           description="Create a group to start splitting."
-          action={<CreateGroupModal />}
+          action={<CreateGroupModal disabled={createDisabled} />}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

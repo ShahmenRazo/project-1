@@ -15,6 +15,20 @@ import type { PayeeHandles } from "@/components/groups/payment-sheet";
 
 export const dynamic = "force-dynamic";
 
+/** Имя участника: display name > username > email-префикс */
+function memberName(profile: {
+  display_name: string | null;
+  username: string | null;
+  email: string;
+}): string {
+  return (
+    profile.display_name ??
+    profile.username ??
+    profile.email.split("@")[0] ??
+    "User"
+  );
+}
+
 export default async function GroupPage({
   params,
 }: {
@@ -99,10 +113,7 @@ export default async function GroupPage({
     if (!profile) continue;
     payees[id] = {
       user_id: id,
-      name:
-        profile.display_name ??
-        profile.email.split("@")[0] ??
-        "User",
+      name: memberName(profile),
       username: profile.username ?? null,
       venmo_username: profile.venmo_username ?? null,
       cash_tag: profile.cash_tag ?? null,
@@ -112,13 +123,10 @@ export default async function GroupPage({
 
   const members: GroupViewMember[] = (memberRows ?? []).map((m) => {
     const profile = profileById.get(m.user_id);
-    const name =
-      profile?.display_name ??
-      profile?.email.split("@")[0] ??
-      "User";
     return {
       user_id: m.user_id,
-      name,
+      name: profile ? memberName(profile) : "User",
+      username: profile?.username ?? null,
       avatar_url: profile?.avatar_url ?? null,
       share_percent: m.share_percent,
       payment_status: m.payment_status,

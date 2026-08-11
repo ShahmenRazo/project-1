@@ -28,6 +28,7 @@ import type { BillingCycle } from "@/lib/database.types";
 export interface GroupViewMember {
   user_id: string;
   name: string;
+  username: string | null;
   avatar_url: string | null;
   share_percent: number;
   payment_status: "pending" | "paid";
@@ -191,6 +192,11 @@ export function GroupView({
                       )}
                     </p>
                     <p className="text-xs text-muted-foreground">
+                      {m.username && (
+                        <span className="mr-1.5 font-medium text-foreground/70">
+                          @{m.username}
+                        </span>
+                      )}
                       Share {m.share_percent}% ·{" "}
                       {m.payment_status === "paid" ? "all paid" : "has debt"}
                     </p>

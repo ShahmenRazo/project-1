@@ -40,7 +40,7 @@ interface MemberRow {
   share: string;
 }
 
-export function CreateGroupModal() {
+export function CreateGroupModal({ disabled = false }: { disabled?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -194,7 +194,7 @@ export function CreateGroupModal() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" disabled={disabled} title={disabled ? "Verify your email first." : undefined}>
           <Users className="h-4 w-4" />
           Create group
         </Button>

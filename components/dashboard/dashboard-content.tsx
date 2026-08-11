@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { GroupsSection } from "@/components/dashboard/groups-section";
+import { EmailVerifyBanner } from "@/components/dashboard/email-verify-banner";
+import { PaymentHandlesBanner } from "@/components/dashboard/payment-handles-banner";
 import {
   DashboardSkeleton,
   GroupListSkeleton,
@@ -13,12 +15,20 @@ import type { DashboardGroup, DashboardSubscription } from "@/lib/types";
 
 export function DashboardContent({
   profile,
+  emailConfirmed,
+  handles,
 }: {
   profile: {
     id: string;
     display_name: string | null;
     email: string;
     subscription_tier: "free" | "pro";
+  };
+  emailConfirmed: boolean;
+  handles: {
+    venmo_username: string | null;
+    cash_tag: string | null;
+    zelle_email: string | null;
   };
 }) {
   const [subscriptions, setSubscriptions] = useState<DashboardSubscription[]>([]);
@@ -69,6 +79,14 @@ export function DashboardContent({
 
   return (
     <div className="space-y-10">
+      {!emailConfirmed && <EmailVerifyBanner email={profile.email} />}
+
+      {!handles.venmo_username &&
+        !handles.cash_tag &&
+        !handles.zelle_email && (
+          <PaymentHandlesBanner displayName={profile.display_name} />
+        )}
+
       {loadingSubs ? (
         <DashboardSkeleton />
       ) : (
@@ -94,7 +112,7 @@ export function DashboardContent({
           <GroupListSkeleton />
         </div>
       ) : (
-        <GroupsSection groups={groups} />
+        <GroupsSection groups={groups} createDisabled={!emailConfirmed} />
       )}
     </div>
   );

@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,7 @@ import type { SubscriptionTier } from "@/lib/database.types";
 export interface AppShellUser {
   display_name: string | null;
   email: string;
+  avatar_url?: string | null;
   subscription_tier: SubscriptionTier;
 }
 
@@ -116,6 +117,9 @@ export function AppShell({
                   aria-label="Account menu"
                 >
                   <Avatar className="h-8 w-8">
+                    {user.avatar_url && (
+                      <AvatarImage src={user.avatar_url} alt="" />
+                    )}
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                 </button>

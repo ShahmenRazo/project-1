@@ -35,6 +35,15 @@ export async function POST(
     const supabase = createClient();
     const user = await requireUser(supabase);
 
+    // Гейт: email должен быть подтверждён для вступления в группу
+    if (!user.email_confirmed_at) {
+      throw new ApiError(
+        403,
+        "Verify your email to join groups",
+        "EMAIL_NOT_VERIFIED"
+      );
+    }
+
     const info = await getPublicInviteInfo(params.token);
     if (!info) {
       throw new ApiError(404, "Link not found", "LINK_NOT_FOUND");

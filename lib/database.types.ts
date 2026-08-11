@@ -63,6 +63,8 @@ export interface Database {
           cash_tag: string | null;
           zelle_email: string | null;
           avatar_url: string | null;
+          onboarding_completed: boolean;
+          phone_number: string | null;
           subscription_tier: SubscriptionTier;
           ls_customer_id: string | null;
           ls_subscription_id: string | null;
@@ -86,6 +88,8 @@ export interface Database {
           cash_tag?: string | null;
           zelle_email?: string | null;
           avatar_url?: string | null;
+          onboarding_completed?: boolean;
+          phone_number?: string | null;
           subscription_tier?: SubscriptionTier;
           ls_customer_id?: string | null;
           ls_subscription_id?: string | null;
@@ -109,6 +113,8 @@ export interface Database {
           cash_tag?: string | null;
           zelle_email?: string | null;
           avatar_url?: string | null;
+          onboarding_completed?: boolean;
+          phone_number?: string | null;
           subscription_tier?: SubscriptionTier;
           ls_customer_id?: string | null;
           ls_subscription_id?: string | null;

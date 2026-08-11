@@ -117,6 +117,15 @@ export async function POST(request: NextRequest) {
     const user = await requireUser(supabase);
     const input = await parseBody(request, createGroupSchema);
 
+    // Гейт: email должен быть подтверждён для создания группы
+    if (!user.email_confirmed_at) {
+      throw new ApiError(
+        403,
+        "Verify your email to create groups",
+        "EMAIL_NOT_VERIFIED"
+      );
+    }
+
     // --- 1. Подписка должна существовать и принадлежать пользователю ---
     const { data: subscription, error: subError } = await supabase
       .from("subscriptions")

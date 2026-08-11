@@ -38,6 +38,21 @@ const updateMeSchema = z
         "Username may contain only letters, digits, dot, dash and underscore"
       )
       .optional(),
+    display_name: z
+      .string()
+      .trim()
+      .min(1, "Name is required")
+      .max(50, "Name must be at most 50 characters")
+      .optional(),
+    avatar_url: z
+      .union([z.literal(""), z.string().url()])
+      .optional()
+      .transform((v) => (v === undefined || v === "" ? v : v.trim())),
+    phone_number: z
+      .union([z.literal(""), z.string()])
+      .optional()
+      .transform((v) => (v === undefined || v === "" ? v : v.trim())),
+    onboarding_completed: z.boolean().optional(),
     venmo_username: optionalString(VENMO_RE),
     cash_tag: z
       .union([z.literal(""), z.string()])
@@ -83,11 +98,22 @@ export async function PUT(req: NextRequest) {
 
     const update: {
       username?: string;
+      display_name?: string;
+      avatar_url?: string | null;
+      phone_number?: string | null;
+      onboarding_completed?: boolean;
       venmo_username?: string | null;
       cash_tag?: string | null;
       zelle_email?: string | null;
     } = {};
     if (body.username !== undefined) update.username = body.username;
+    if (body.display_name !== undefined)
+      update.display_name = body.display_name;
+    if (body.avatar_url !== undefined) update.avatar_url = body.avatar_url;
+    if (body.phone_number !== undefined)
+      update.phone_number = body.phone_number;
+    if (body.onboarding_completed !== undefined)
+      update.onboarding_completed = body.onboarding_completed;
     if (body.venmo_username !== undefined)
       update.venmo_username = body.venmo_username;
     if (body.cash_tag !== undefined) update.cash_tag = body.cash_tag;
@@ -98,7 +124,7 @@ export async function PUT(req: NextRequest) {
       .update(update)
       .eq("id", user.id)
       .select(
-        "id, display_name, email, username, venmo_username, cash_tag, zelle_email, subscription_tier"
+        "id, display_name, email, username, avatar_url, phone_number, onboarding_completed, venmo_username, cash_tag, zelle_email, subscription_tier"
       )
       .single();
 
