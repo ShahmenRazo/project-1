@@ -82,6 +82,35 @@ export async function POST(
       throw new ApiError(409, "No shares left in this group", "NO_SHARES_LEFT");
     }
 
+    // --- Контроль долей: если сумма превысит 100%, долю уступает создатель ---
+    const { data: memberRows } = await admin
+      .from("group_members")
+      .select("user_id, share_percent")
+      .eq("group_id", info.group_id);
+    const currentSum = roundMoney(
+      (memberRows ?? []).reduce((sum, m) => sum + (m.share_percent ?? 0), 0)
+    );
+    const overflow = roundMoney(currentSum + info.share_percent - 100);
+
+    if (overflow > 0) {
+      const creatorMember = (memberRows ?? []).find(
+        (m) => m.user_id === info.creator_id
+      );
+      if (!creatorMember || (creatorMember.share_percent ?? 0) < overflow) {
+        throw new ApiError(409, "No shares left in this group", "NO_SHARES_LEFT");
+      }
+      const { error: creatorError } = await admin
+        .from("group_members")
+        .update({
+          share_percent: roundMoney(
+            (creatorMember.share_percent ?? 0) - overflow
+          ),
+        })
+        .eq("group_id", info.group_id)
+        .eq("user_id", info.creator_id);
+      if (creatorError) throw creatorError;
+    }
+
     // --- Добавляем участника ---
     const { error: insertError } = await admin
       .from("group_members")

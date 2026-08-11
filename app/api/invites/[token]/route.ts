@@ -130,20 +130,43 @@ export async function POST(
       );
     }
 
-    // Контроль долей: 100% минус доли участников >= доля invite
+    // Контроль долей: если сумма превысит 100%, долю уступает создатель
     const { data: members } = await supabase
       .from("group_members")
-      .select("share_percent")
+      .select("user_id, share_percent")
       .eq("group_id", group.id);
     const currentSum = roundMoney(
       (members ?? []).reduce((sum, m) => sum + m.share_percent, 0)
     );
-    if (roundMoney(currentSum + invite.share_percent) > 100) {
-      throw new ApiError(
-        409,
-        "No shares left in this group",
-        "SHARES_EXCEEDED"
+    const overflow = roundMoney(currentSum + invite.share_percent - 100);
+
+    if (overflow > 0) {
+      const creatorId = invite.groups?.creator_id;
+      if (!creatorId) {
+        throw new ApiError(
+          409,
+          "No shares left in this group",
+          "SHARES_EXCEEDED"
+        );
+      }
+      const creatorMember = (members ?? []).find(
+        (m) => m.user_id === creatorId
       );
+      if (!creatorMember || creatorMember.share_percent < overflow) {
+        throw new ApiError(
+          409,
+          "No shares left in this group",
+          "SHARES_EXCEEDED"
+        );
+      }
+      const { error: creatorError } = await supabase
+        .from("group_members")
+        .update({
+          share_percent: roundMoney(creatorMember.share_percent - overflow),
+        })
+        .eq("group_id", group.id)
+        .eq("user_id", creatorId);
+      if (creatorError) throw creatorError;
     }
 
     // --- 1. Добавляем участника (admin-клиент: только авторизованный

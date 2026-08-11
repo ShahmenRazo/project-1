@@ -117,10 +117,10 @@ export function InviteFriends({
     }
     setSending(true);
     try {
-      const body: Record<string, unknown> = {
-        group_id: groupId,
-        share_percent: freeShare,
-      };
+      const body: Record<string, unknown> = { group_id: groupId };
+      if (freeShare > 0) {
+        body.share_percent = freeShare;
+      }
       if (value.includes("@")) {
         body.email = value;
       } else {
@@ -169,37 +169,37 @@ export function InviteFriends({
         Share the free share of the subscription with friends.
       </p>
 
-      {freeShare > 0 && (
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Input
-                placeholder="Enter email or username"
-                value={target}
-                onChange={(e) => setTarget(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    void sendInvite();
-                  }
-                }}
-                aria-label="Enter email or username"
-              />
-            </div>
-            <Button onClick={() => void sendInvite()} disabled={sending}>
-              {sending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Mail className="mr-2 h-4 w-4" />
-              )}
-              Invite
-            </Button>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Input
+              placeholder="Enter email or username"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void sendInvite();
+                }
+              }}
+              aria-label="Enter email or username"
+            />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Share offered: {freeShare}%
-          </p>
+          <Button onClick={() => void sendInvite()} disabled={sending}>
+            {sending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Mail className="mr-2 h-4 w-4" />
+            )}
+            Invite
+          </Button>
         </div>
-      )}
+        <p className="text-xs text-muted-foreground">
+          {freeShare > 0
+            ? `Share offered: ${freeShare}%`
+            : "The share is taken from the creator's share on join."}
+        </p>
+      </div>
 
       <div className="mt-4 space-y-3 border-t pt-3">
         <div className="flex flex-wrap items-center gap-2">

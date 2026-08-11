@@ -116,7 +116,7 @@ export async function getPublicInviteInfo(
       .eq("group_id", group.id),
     admin
       .from("group_members")
-      .select("share_percent")
+      .select("user_id, share_percent")
       .eq("group_id", group.id),
   ]);
 
@@ -126,12 +126,22 @@ export async function getPublicInviteInfo(
   );
   const remaining = roundMoney(100 - used);
 
+  // Доля нового участника: свободная доля, а если её нет (создатель держит
+  // всё) — половина доли создателя (до 50%), чтобы группу из одного человека
+  // можно было сплитить ссылкой.
+  const creatorShare = roundMoney(
+    (memberRows ?? []).find((m) => m.user_id === group.creator_id)
+      ?.share_percent ?? 0
+  );
+  const shareForNewMember =
+    remaining > 0 ? remaining : Math.min(50, creatorShare);
+
   base.member_count = memberCount ?? 0;
-  base.share_percent = Math.max(0, remaining);
+  base.share_percent = shareForNewMember;
   if (sub) {
     base.currency = sub.currency;
     base.share_monthly = roundMoney(
-      shareAmount(sub.price, Math.max(0, remaining), sub.billing_cycle)
+      shareAmount(sub.price, shareForNewMember, sub.billing_cycle)
     );
   }
 

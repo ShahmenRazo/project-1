@@ -14,7 +14,12 @@ const inviteByEmailSchema = z
     group_id: z.string().uuid(),
     email: z.string().trim().email().optional(),
     username: z.string().trim().min(1).max(40).optional(),
-    share_percent: z.number().positive().max(100).multipleOf(0.01),
+    share_percent: z
+      .number()
+      .positive()
+      .max(100)
+      .multipleOf(0.01)
+      .optional(),
   })
   .refine((v) => Boolean(v.email ?? v.username), {
     message: "email or username is required",
@@ -84,19 +89,24 @@ export async function POST(req: NextRequest) {
 
     const { data: memberRows } = await supabase
       .from("group_members")
-      .select("share_percent")
+      .select("user_id, share_percent")
       .eq("group_id", group.id);
 
-    const used = (memberRows ?? []).reduce(
-      (sum, m) => sum + (m.share_percent ?? 0),
-      0
-    );
-    const remaining = roundMoney(100 - used);
+    // Доля, которую создатель может уступить: всё, кроме долей остальных
+    // участников. Свободная доля + доля создателя.
+    const usedByOthers = (memberRows ?? [])
+      .filter((m) => m.user_id !== group.creator_id)
+      .reduce((sum, m) => sum + (m.share_percent ?? 0), 0);
+    const maxInvitable = roundMoney(100 - usedByOthers);
 
-    if (body.share_percent > remaining) {
+    const sharePercent = roundMoney(
+      body.share_percent ?? Math.min(50, maxInvitable)
+    );
+
+    if (sharePercent > maxInvitable) {
       throw new ApiError(
         400,
-        `Only ${remaining}% of the subscription is free — reduce the share`,
+        `Only ${maxInvitable}% of the subscription is free — reduce the share`,
         "SHARE_TOO_LARGE"
       );
     }
@@ -118,7 +128,7 @@ export async function POST(req: NextRequest) {
       token = existing.token;
       const { error: updError } = await supabase
         .from("invites")
-        .update({ share_percent: body.share_percent, expires_at: expiresAt })
+        .update({ share_percent: sharePercent, expires_at: expiresAt })
         .eq("id", existing.id);
       if (updError) throw updError;
     } else {
@@ -127,7 +137,7 @@ export async function POST(req: NextRequest) {
         group_id: group.id,
         email: targetEmail,
         token,
-        share_percent: body.share_percent,
+        share_percent: sharePercent,
         expires_at: expiresAt,
       });
       if (invError) throw invError;
@@ -138,7 +148,7 @@ export async function POST(req: NextRequest) {
       to: targetEmail,
       groupName: group.name,
       subscriptionName: sub?.name ?? "",
-      sharePercent: body.share_percent,
+      sharePercent: sharePercent,
       inviteLink: link,
     });
 
