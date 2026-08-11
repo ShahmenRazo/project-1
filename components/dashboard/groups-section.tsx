@@ -31,7 +31,7 @@ export function GroupsSection({
         <div>
           <h2 className="text-lg font-semibold tracking-tight">My groups</h2>
           <p className="text-sm text-muted-foreground">
-            Split subscriptions and keep track of balances
+            Split subscriptions and track debts
           </p>
         </div>
         <CreateGroupModal />
