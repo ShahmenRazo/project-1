@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, Copy, Link2, Loader2, Mail, QrCode, Send } from "lucide-react";
+import { Check, Copy, Link2, Loader2, Mail, QrCode, Send, UserPlus } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -164,7 +164,15 @@ export function InviteFriends({
   }
 
   return (
-    <Tabs defaultValue="link">
+    <div className="rounded-lg border bg-card p-4">
+      <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold">
+        <UserPlus className="h-4 w-4" />
+        Invite friends
+      </h2>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Share the free share of the subscription with friends.
+      </p>
+      <Tabs defaultValue="link">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="link">
           <Link2 className="mr-1.5 h-4 w-4" />
@@ -282,5 +290,6 @@ export function InviteFriends({
         )}
       </TabsContent>
     </Tabs>
+    </div>
   );
 }
