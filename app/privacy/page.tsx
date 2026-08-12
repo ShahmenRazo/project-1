@@ -2,9 +2,22 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/layout/legal-shell";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
+  title: "Privacy Policy — SubSplit",
   description:
     "SubSplit Privacy Policy — what data we collect, how we use it, cookies and your GDPR/CCPA rights.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: "Privacy Policy — SubSplit",
+    description:
+      "SubSplit Privacy Policy — what data we collect, how we use it, cookies and your GDPR/CCPA rights.",
+    url: "/privacy",
+    type: "website",
+    siteName: "SubSplit",
+    images: [
+      { url: "/api/og?title=SubSplit%20Privacy", width: 1200, height: 630 },
+    ],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function PrivacyPage() {

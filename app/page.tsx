@@ -22,8 +22,6 @@ import { TrustBadges } from "@/components/trust/TrustBadges";
 import { SeoSections } from "@/components/landing/SeoSections";
 import { jsonLd, ORGANIZATION_SCHEMA, softwareApplicationSchema } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
-
 // ---------- Copy (US market) ----------
 const COPY = {
   brand: "SubSplit",

@@ -18,6 +18,10 @@ export function generateMetadata({
   const post = getPostBySlug(params.slug);
   if (!post) return {};
 
+  const ogTitle = encodeURIComponent(
+    `${post.title.split(" — ")[0]} | SubSplit`
+  );
+
   return {
     title: `${post.title} | SubSplit Blog`,
     description: post.excerpt,
@@ -28,13 +32,19 @@ export function generateMetadata({
       url: `/blog/${post.slug}`,
       type: "article",
       publishedTime: post.date,
-      images: [{ url: "/api/og", width: 1200, height: 630 }],
+      images: [
+        {
+          url: `/api/og?title=${ogTitle}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
-      images: ["/api/og"],
+      images: [`/api/og?title=${ogTitle}`],
     },
   };
 }

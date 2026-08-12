@@ -18,12 +18,21 @@ export const metadata = {
       "Premium features are on the way. All SubSplit features are free during beta — split subscriptions with friends at no cost.",
     url: "/pricing",
     type: "website",
+    siteName: "SubSplit",
+    images: [
+      {
+        url: "/api/og?title=SubSplit%20Pricing",
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "SubSplit — Pro is coming soon",
     description:
       "Premium features are on the way. All SubSplit features are free during beta — split subscriptions with friends at no cost.",
+    images: ["/api/og?title=SubSplit%20Pricing"],
   },
 };
 

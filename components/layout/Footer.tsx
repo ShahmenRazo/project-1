@@ -21,6 +21,31 @@ const COPY = {
       ],
     },
     {
+      title: "Guides",
+      links: [
+        {
+          label: "Split Netflix",
+          href: "/split-netflix",
+        },
+        {
+          label: "Split Spotify",
+          href: "/split-spotify",
+        },
+        {
+          label: "Split ChatGPT",
+          href: "/split-chatgpt",
+        },
+        {
+          label: "Split Disney+",
+          href: "/split-disney-plus",
+        },
+        {
+          label: "How to split subscriptions",
+          href: "/how-to-split-subscriptions",
+        },
+      ],
+    },
+    {
       title: "Legal",
       links: [
         { label: "Privacy Policy", href: "/privacy" },

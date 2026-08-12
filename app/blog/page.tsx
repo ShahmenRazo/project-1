@@ -14,12 +14,17 @@ export const metadata: Metadata = {
       "Guides on splitting Netflix, Spotify and ChatGPT costs, auditing unused subscriptions, and keeping shared accounts fair.",
     url: "/blog",
     type: "website",
+    siteName: "SubSplit",
+    images: [
+      { url: "/api/og?title=SubSplit%20Blog", width: 1200, height: 630 },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Blog — SubSplit Subscription Money Tips",
     description:
       "Guides on splitting Netflix, Spotify and ChatGPT costs, auditing unused subscriptions, and keeping shared accounts fair.",
+    images: ["/api/og?title=SubSplit%20Blog"],
   },
 };
 

@@ -2,9 +2,22 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/layout/legal-shell";
 
 export const metadata: Metadata = {
-  title: "Terms of Service",
+  title: "Terms of Service — SubSplit",
   description:
     "SubSplit Terms of Service — your responsibilities, the scope of the service, disclaimers and Pro subscription terms.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    title: "Terms of Service — SubSplit",
+    description:
+      "SubSplit Terms of Service — your responsibilities, the scope of the service, disclaimers and Pro subscription terms.",
+    url: "/terms",
+    type: "website",
+    siteName: "SubSplit",
+    images: [
+      { url: "/api/og?title=SubSplit%20Terms", width: 1200, height: 630 },
+    ],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function TermsPage() {

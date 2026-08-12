@@ -23,6 +23,19 @@ export const ORGANIZATION_SCHEMA = {
   ],
 };
 
+export function webSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "SubSplit",
+    url: SITE_URL,
+    description:
+      "Split Netflix, Spotify, ChatGPT and other subscription costs with friends automatically.",
+    publisher: ORGANIZATION_SCHEMA,
+    inLanguage: "en-US",
+  };
+}
+
 export function softwareApplicationSchema() {
   return {
     ...ORGANIZATION_SCHEMA,
@@ -32,14 +45,30 @@ export function softwareApplicationSchema() {
     operatingSystem: "Any",
     offers: {
       "@type": "Offer",
-      price: "3.99",
+      price: "0",
       priceCurrency: "USD",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.9",
-      ratingCount: "2000",
-    },
+  };
+}
+
+/** WebPage schema для контентных/hub страниц */
+export function webPageSchema({
+  title,
+  description,
+  path,
+}: {
+  title: string;
+  description: string;
+  path: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: `${SITE_URL}${path}`,
+    inLanguage: "en-US",
+    isPartOf: webSiteSchema(),
   };
 }
 

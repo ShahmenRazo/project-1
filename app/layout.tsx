@@ -5,6 +5,7 @@ import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PwaShell } from "@/components/layout/pwa-shell";
 import { Footer } from "@/components/layout/Footer";
+import { jsonLd, webSiteSchema, ORGANIZATION_SCHEMA } from "@/lib/seo";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://kitstartai.com";
@@ -78,6 +79,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
+        {jsonLd(webSiteSchema())}
+        {jsonLd(ORGANIZATION_SCHEMA)}
         <GoogleAnalytics />
         {children}
         <PwaShell />

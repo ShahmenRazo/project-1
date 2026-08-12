@@ -15,12 +15,17 @@ export const metadata: Metadata = {
       "Answers about sharing Netflix, Spotify and ChatGPT costs: how payments work, is it secure, what if a friend doesn't pay, and more.",
     url: "/faq",
     type: "website",
+    siteName: "SubSplit",
+    images: [
+      { url: "/api/og?title=SubSplit%20FAQ", width: 1200, height: 630 },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "FAQ — How SubSplit Works",
     description:
       "Answers about sharing Netflix, Spotify and ChatGPT costs: how payments work, is it secure, what if a friend doesn't pay, and more.",
+    images: ["/api/og?title=SubSplit%20FAQ"],
   },
 };
 
