@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 
@@ -28,14 +27,9 @@ export default async function OnboardingPage() {
     .single();
 
   if (profile?.onboarding_completed) {
-    // Кука-кэш для middleware: прошедшие онбординг юзеры (в т.ч. до куки) не зацикливаются
-    cookies().set("onboarding_status", "complete", {
-      path: "/",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 365,
-    });
-    redirect("/dashboard");
+    // Кука-кэш для middleware ставится в Route Handler (в Server Component нельзя).
+    // Легаси-пользователи без куки не зацикливаются: /onboarding → /dashboard → /onboarding…
+    redirect("/api/auth/onboarding-complete");
   }
 
   // Дефолтное имя из Google OAuth (full_name) или префикса email
