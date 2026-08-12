@@ -62,6 +62,7 @@ export interface Database {
           venmo_username: string | null;
           cash_tag: string | null;
           zelle_email: string | null;
+          zelle_phone: string | null;
           avatar_url: string | null;
           onboarding_completed: boolean;
           phone_number: string | null;
@@ -87,6 +88,7 @@ export interface Database {
           venmo_username?: string | null;
           cash_tag?: string | null;
           zelle_email?: string | null;
+          zelle_phone?: string | null;
           avatar_url?: string | null;
           onboarding_completed?: boolean;
           phone_number?: string | null;
@@ -112,6 +114,7 @@ export interface Database {
           venmo_username?: string | null;
           cash_tag?: string | null;
           zelle_email?: string | null;
+          zelle_phone?: string | null;
           avatar_url?: string | null;
           onboarding_completed?: boolean;
           phone_number?: string | null;

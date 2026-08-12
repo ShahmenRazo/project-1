@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { apiErrorMessageAsync } from "@/lib/client-errors";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -168,10 +169,18 @@ export function ProfileContent({
   const savePhone = async () => {
     setSavingPhone(true);
     try {
+      const raw = phone.trim();
+      const parsed = parsePhoneNumberFromString(
+        raw.startsWith("+") ? raw : `+1${raw.replace(/[^\d]/g, "")}`
+      );
+      const body =
+        parsed && parsed.isValid()
+          ? { phone_number: parsed.format("E.164") }
+          : { phone_number: raw };
       const res = await fetch("/api/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone_number: phone.trim() }),
+        body: JSON.stringify(body),
       });
       const json = (await res.json().catch(() => null)) as {
         error?: { message?: string };

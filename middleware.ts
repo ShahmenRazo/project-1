@@ -99,6 +99,21 @@ export async function middleware(request: NextRequest) {
     if (pathname === "/login") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
+
+    // Обязательный онбординг: без куки onboarding_status=complete все страницы
+    // (кроме /onboarding и /api/*) ведут на /onboarding. Кука ставится при
+    // завершении онбординга (PUT /api/me) и на самой /onboarding, если профиль
+    // уже заполнен, — это убирает лишние запросы к БД на каждом реквесте.
+    const onboardingComplete =
+      request.cookies.get("onboarding_status")?.value === "complete";
+    if (
+      !onboardingComplete &&
+      pathname !== "/onboarding" &&
+      !isApi
+    ) {
+      return NextResponse.redirect(new URL("/onboarding", request.url));
+    }
+
     return response;
   }
 

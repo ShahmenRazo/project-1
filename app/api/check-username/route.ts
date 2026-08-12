@@ -4,14 +4,17 @@ import { ok, fail } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/username-check?value=alex — доступность username (публичный, для онбординга)
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+
+// GET /api/check-username?username=alex — доступность username
+// (публичный, для онбординга и профиля)
 export async function GET(request: NextRequest) {
   try {
-    const value = (request.nextUrl.searchParams.get("value") ?? "")
+    const value = (request.nextUrl.searchParams.get("username") ?? "")
       .trim()
       .toLowerCase();
 
-    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(value)) {
+    if (!USERNAME_RE.test(value)) {
       return ok({ available: false, invalid: true });
     }
 
