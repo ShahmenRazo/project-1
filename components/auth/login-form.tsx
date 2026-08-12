@@ -26,13 +26,13 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  async function handleOAuth(provider: "google" | "apple") {
+  async function handleGoogle() {
     if (oauthLoading) return;
     setOauthLoading(true);
     try {
       const supabase = createBrowserClientInstance();
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback${next !== "/dashboard" ? `?next=${encodeURIComponent(next)}` : ""}`,
         },
@@ -40,9 +40,7 @@ export function LoginForm() {
       if (error) throw error;
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : `Failed to start ${provider === "google" ? "Google" : "Apple"} sign-in`
+        error instanceof Error ? error.message : "Failed to start Google sign-in"
       );
       setOauthLoading(false);
     }
@@ -92,7 +90,7 @@ export function LoginForm() {
         type="button"
         variant="outline"
         className="w-full"
-        onClick={() => void handleOAuth("google")}
+        onClick={() => void handleGoogle()}
         disabled={oauthLoading}
       >
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -114,19 +112,6 @@ export function LoginForm() {
           />
         </svg>
         {oauthLoading ? "Redirecting…" : "Continue with Google"}
-      </Button>
-
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={() => void handleOAuth("apple")}
-        disabled={oauthLoading}
-      >
-        <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M17.05 12.54c-.03-2.9 2.37-4.3 2.47-4.37-1.35-1.97-3.44-2.24-4.18-2.27-1.78-.18-3.47 1.05-4.37 1.05-.9 0-2.29-1.02-3.77-1-1.94.03-3.72 1.13-4.72 2.86-2.01 3.49-.51 8.66 1.45 11.49.96 1.39 2.1 2.95 3.6 2.89 1.44-.06 1.99-.93 3.73-.93 1.75 0 2.24.93 3.76.9 1.56-.03 2.54-1.41 3.49-2.81 1.1-1.6 1.55-3.16 1.58-3.24-.03-.02-3.02-1.16-3.04-4.57Zm-2.84-8.38c.8-.97 1.33-2.32 1.19-3.66-1.15.05-2.54.77-3.36 1.73-.74.86-1.39 2.23-1.21 3.55 1.28.1 2.58-.65 3.38-1.62Z" />
-        </svg>
-        {oauthLoading ? "Redirecting…" : "Continue with Apple"}
       </Button>
 
       <div className="flex items-center gap-3">
