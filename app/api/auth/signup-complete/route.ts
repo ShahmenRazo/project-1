@@ -72,20 +72,7 @@ const signupSchema = z
   .refine((v) => v.password === v.confirm_password, {
     message: "Passwords do not match",
     path: ["confirm_password"],
-  })
-  .refine(
-    (v) =>
-      Boolean(
-        (v.venmo_username && v.venmo_username !== "") ||
-          (v.cash_tag && v.cash_tag !== "") ||
-          (v.zelle_email && v.zelle_email !== "") ||
-          (v.zelle_phone && v.zelle_phone !== "")
-      ),
-    {
-      message: "Add at least one payment handle (Venmo, Cash App or Zelle)",
-      path: ["venmo_username"],
-    }
-  );
+  });
 
 // POST /api/auth/signup-complete — регистрация с полным профилем.
 // Создаёт auth.user (signUp) + строку в users (триггер on_auth_user_created

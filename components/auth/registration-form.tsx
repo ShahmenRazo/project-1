@@ -121,10 +121,6 @@ export function RegistrationForm({
     return Boolean(parsed?.isValid());
   }, [zellePhone]);
 
-  const hasAnyHandle = Boolean(
-    venmo.trim() || cashTag.trim() || zelle.trim() || zellePhone.trim()
-  );
-
   const canSubmit =
     email.includes("@") &&
     password.length >= 6 &&
@@ -132,7 +128,6 @@ export function RegistrationForm({
     displayName.trim().length > 0 &&
     usernameState.status === "available" &&
     phoneParsed.valid &&
-    hasAnyHandle &&
     zellePhoneValid &&
     !saving &&
     !processingAvatar;
@@ -419,7 +414,7 @@ export function RegistrationForm({
       <div className="space-y-3 rounded-lg border p-3">
         <p className="flex items-center gap-2 text-xs font-medium">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          Payment handles — at least one, so friends can pay you back
+          Payment handles <span className="font-normal text-muted-foreground">(optional — friends can pay you back)</span>
         </p>
         <div className="grid gap-1.5">
           <Label htmlFor="signup-venmo" className="text-xs text-muted-foreground">
