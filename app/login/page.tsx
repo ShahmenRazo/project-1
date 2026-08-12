@@ -52,7 +52,7 @@ export default async function LoginPage({
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-sm">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-xl">Sign in to SubSplit</CardTitle>
             <CardDescription>

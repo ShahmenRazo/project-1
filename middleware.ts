@@ -88,6 +88,8 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith("/api/public-invites/") &&
     !pathname.startsWith("/api/og") &&
     !pathname.startsWith("/api/waitlist") &&
+    !pathname.startsWith("/api/auth/signup-complete") &&
+    !pathname.startsWith("/api/check-username") &&
     !pathname.startsWith("/api/auth/impersonate");
   const isProtectedPage =
     pathname.startsWith("/dashboard") ||
