@@ -42,7 +42,7 @@ export function MemeReminders() {
   const handleMark = async (id: string) => {
     setMarking((prev) => new Set(prev).add(id));
     try {
-      const res = await fetch("/api/notifications/read", {
+      const res = await fetch("/api/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: [id] }),
