@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notifications";
 import { formatMoney } from "@/lib/format";
 import { roundMoney } from "@/lib/utils";
+import { randomMeme } from "@/lib/memes";
 
 // GET /api/cron/daily-reminders — Vercel Cron (ежедневно 08:00 UTC)
 // Защита: Authorization: Bearer CRON_SECRET
@@ -76,12 +77,19 @@ export async function GET(request: NextRequest) {
       entry.total,
       entry.currency
     )} in group "${entry.groupName}" (${entry.subName})`;
+    const meme = randomMeme();
 
-    await notifyUser(userId, "reminder", message, {
-      title: "SubSplit: debt reminder",
-      body: message,
-      url: entry.groupId ? `/groups/${entry.groupId}` : "/",
-    });
+    await notifyUser(
+      userId,
+      "reminder",
+      `${meme.label}: ${message}`,
+      {
+        title: "SubSplit: debt reminder",
+        body: message,
+        url: entry.groupId ? `/groups/${entry.groupId}` : "/",
+      },
+      meme.url
+    );
 
     remindedIds.push(...entry.ids);
   }

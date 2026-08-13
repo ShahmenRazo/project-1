@@ -9,13 +9,14 @@ import type { NotificationType } from "@/lib/database.types";
 export async function createNotification(
   userId: string,
   type: NotificationType,
-  message: string
+  message: string,
+  imageUrl?: string
 ): Promise<void> {
   try {
     const admin = createAdminClient();
     const { error } = await admin
       .from("notifications")
-      .insert({ user_id: userId, type, message });
+      .insert({ user_id: userId, type, message, image_url: imageUrl ?? null });
     if (error) throw error;
   } catch (error) {
     console.error("[notifications] failed to create:", error);
@@ -30,9 +31,10 @@ export async function notifyUser(
   userId: string,
   type: NotificationType,
   message: string,
-  push?: { title: string; body: string; url: string }
+  push?: { title: string; body: string; url: string },
+  imageUrl?: string
 ): Promise<void> {
-  await createNotification(userId, type, message);
+  await createNotification(userId, type, message, imageUrl);
   if (push) {
     await notifyUserPush(userId, push.title, push.body, push.url);
   }

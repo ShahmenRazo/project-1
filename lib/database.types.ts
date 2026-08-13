@@ -422,6 +422,7 @@ export interface Database {
           user_id: string;
           type: NotificationType;
           message: string;
+          image_url: string | null;
           read: boolean;
           read_at: string | null;
           created_at: string;
@@ -431,6 +432,7 @@ export interface Database {
           user_id: string;
           type: NotificationType;
           message: string;
+          image_url?: string | null;
           read?: boolean;
           read_at?: string | null;
           created_at?: string;
@@ -440,6 +442,7 @@ export interface Database {
           user_id?: string;
           type?: NotificationType;
           message?: string;
+          image_url?: string | null;
           read?: boolean;
           read_at?: string | null;
           created_at?: string;

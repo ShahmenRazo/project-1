@@ -1,42 +1,69 @@
 import { NextRequest } from "next/server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { fail, ok, parseBody, requireUser } from "@/lib/api";
-import { notificationsQuerySchema } from "@/lib/schemas";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/notifications?limit=50&unread_only=true
+interface NotificationRow {
+  id: string;
+  type: string;
+  message: string;
+  image_url: string | null;
+  created_at: string;
+}
+
+// GET /api/notifications — непрочитанные уведомления текущего пользователя
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
     const user = await requireUser(supabase);
 
-    const query = notificationsQuerySchema.parse(
-      Object.fromEntries(request.nextUrl.searchParams)
+    const limit = Math.min(
+      Math.max(Number(request.nextUrl.searchParams.get("limit") ?? 10), 1),
+      50
     );
 
-    let builder = supabase
+    const { data, error } = await supabase
       .from("notifications")
-      .select("id, type, message, read, created_at")
+      .select("id, type, message, image_url, created_at")
       .eq("user_id", user.id)
+      .eq("read", false)
       .order("created_at", { ascending: false })
-      .limit(query.limit);
+      .limit(limit);
 
-    if (query.unread_only) {
-      builder = builder.eq("read", false);
-    }
-
-    const { data: notifications, error } = await builder;
     if (error) throw error;
 
-    const { count, error: countError } = await supabase
-      .from("notifications")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("read", false);
-    if (countError) throw countError;
+    return ok({ notifications: (data ?? []) as NotificationRow[] });
+  } catch (error) {
+    return fail(error);
+  }
+}
 
-    return ok({ notifications, unread_count: count ?? 0 });
+const markReadSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(50),
+});
+
+// POST /api/notifications/read — пометить уведомления прочитанными
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = createClient();
+    const user = await requireUser(supabase);
+    const body = await parseBody(request, markReadSchema);
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ read: true, read_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .in("id", body.ids)
+      .select("id");
+
+    if (error) throw error;
+    if ((data?.length ?? 0) !== body.ids.length) {
+      // Часть id чужие/несуществующие — не страшно, но отметим
+    }
+
+    return ok({ marked: data?.length ?? 0 });
   } catch (error) {
     return fail(error);
   }

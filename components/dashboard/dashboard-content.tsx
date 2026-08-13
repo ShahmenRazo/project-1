@@ -7,6 +7,7 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { GroupsSection } from "@/components/dashboard/groups-section";
 import { EmailVerifyBanner } from "@/components/dashboard/email-verify-banner";
 import { PaymentHandlesBanner } from "@/components/dashboard/payment-handles-banner";
+import { MemeReminders } from "@/components/dashboard/meme-reminders";
 import {
   DashboardSkeleton,
   GroupListSkeleton,
@@ -86,6 +87,8 @@ export function DashboardContent({
         !handles.zelle_email && (
           <PaymentHandlesBanner displayName={profile.display_name} />
         )}
+
+      <MemeReminders />
 
       {loadingSubs ? (
         <DashboardSkeleton />
