@@ -182,10 +182,7 @@ export function OnboardingFlow({ initial }: { initial: OnboardingInitial }) {
     phoneValid &&
     !uploadingAvatar;
 
-  const hasAnyHandle = Boolean(
-    venmo.trim() || cashTag.trim() || zelle.trim() || zellePhone.trim()
-  );
-  const canContinueHandles = hasAnyHandle && zellePhoneValid;
+  const canContinueHandles = zellePhoneValid;
 
   const resizeImage = (file: File): Promise<Blob> =>
     new Promise((resolve, reject) => {
@@ -316,7 +313,7 @@ export function OnboardingFlow({ initial }: { initial: OnboardingInitial }) {
             {step === 1 &&
               "Friends will see your name, username and photo in groups."}
             {step === 2 &&
-              "Add at least one way for group members to pay you back."}
+              "Optional — a way for group members to pay you back. You can add these later in Settings."}
             {step === 3 && "Check everything looks right before we start."}
           </p>
         </div>
@@ -503,8 +500,8 @@ export function OnboardingFlow({ initial }: { initial: OnboardingInitial }) {
         <div className="space-y-6">
           <p className="flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2.5 text-sm">
             <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-            Your friends need this to pay you back. You can update these later
-            in Settings.
+            Optional — your friends need this to pay you back, but you can
+            update these later in Settings.
           </p>
 
           <div className="space-y-4">
@@ -573,10 +570,9 @@ export function OnboardingFlow({ initial }: { initial: OnboardingInitial }) {
               type="button"
               variant="ghost"
               className="shrink-0"
-              onClick={() => setStep(1)}
+              onClick={() => setStep(3)}
             >
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              Back
+              Skip for now
             </Button>
             <Button
               className="w-full"

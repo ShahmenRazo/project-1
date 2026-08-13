@@ -117,23 +117,16 @@ export async function PUT(req: NextRequest) {
 
     // Обязательный онбординг: перед завершением проверяем все required-поля
     if (body.onboarding_completed === true) {
-      const hasHandle = Boolean(
-        (body.venmo_username && body.venmo_username !== "") ||
-          (body.cash_tag && body.cash_tag !== "") ||
-          (body.zelle_email && body.zelle_email !== "") ||
-          (zellePhone && zellePhone !== "")
-      );
       if (
         !body.username ||
         !body.username.trim() ||
         !body.display_name ||
         !body.display_name.trim() ||
-        !phone ||
-        !hasHandle
+        !phone
       ) {
         throw new ApiError(
           400,
-          "Username, display name, phone and at least one payment handle are required",
+          "Username, display name and phone are required",
           "MANDATORY_ONBOARDING_FIELDS"
         );
       }
