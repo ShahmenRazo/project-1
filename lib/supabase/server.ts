@@ -1,7 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/lib/database.types";
-import { AUTH_COOKIE_OPTIONS } from "@/lib/supabase/cookies";
 
 /**
  * User-scoped Supabase client (works with RLS).
@@ -14,7 +13,7 @@ export function createClient() {
     process.env.SUPABASE_INTERNAL_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookieOptions: AUTH_COOKIE_OPTIONS,
+      cookieOptions: { name: "sb-auth-token" },
       cookies: {
         getAll() {
           return cookieStore.getAll();
