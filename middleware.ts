@@ -102,6 +102,12 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
+    // Залогиненные с главной сразу идут в дашборд (незаполненный онбординг
+    // перенаправит на /onboarding ниже). Гостям и краулерам лендинг остаётся.
+    if (pathname === "/") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
     // Обязательный онбординг: без куки onboarding_status=complete все страницы
     // (кроме /onboarding и /api/*) ведут на /onboarding. Кука ставится при
     // завершении онбординга (PUT /api/me) и на самой /onboarding, если профиль
