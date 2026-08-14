@@ -81,30 +81,26 @@ export async function middleware(request: NextRequest) {
 
   // Legacy-дубли кук: в коротком окне деплоя сессия писалась ещё и с
   // Domain=.kitstartai.com, в браузерах накопились две генерации sb-auth-token
-  // (host-only + domain). Вместе они раздувают Cookie-заголовок за лимит
-  // Cloudflare (~8KB) → 400 Request Header Or Cookie Too Large (Safari).
-  // Если в запросе >1 куки сессии — убиваем только Domain-варианты
-  // (максимум 6 чанков), host-only генерация не трогается.
-  const authCookieNames = [
-    ...new Set(
-      request.cookies
-        .getAll()
-        .filter(
-          (c) =>
-            c.name === "sb-auth-token" ||
-            c.name.startsWith("sb-auth-token.")
-        )
-        .map((c) => c.name)
-    ),
-  ];
-  if (authCookieNames.length >= 2) {
-    authCookieNames.forEach((name) =>
+  // (host-only + domain) под одним именем. Вместе они раздувают Cookie-заголовок
+  // за лимит Cloudflare (~8KB) → 400 Request Header Or Cookie Too Large (Safari).
+  // Дубль = одно и то же имя куки встречается ≥2 раз (host-only + Domain-вариант).
+  // Легитимный чанкинг (sb-auth-token + sb-auth-token.0) — имена разные, не трогаем.
+  // Удаляем только Domain-варианты: Set-Cookie c Domain=.kitstartai.com + maxAge 0
+  // (host-only генерация живёт дальше и обновляется обычным refresh).
+  const dupCounter = new Map<string, number>();
+  for (const c of request.cookies.getAll()) {
+    if (c.name === "sb-auth-token" || c.name.startsWith("sb-auth-token.")) {
+      dupCounter.set(c.name, (dupCounter.get(c.name) ?? 0) + 1);
+    }
+  }
+  if ([...dupCounter.values()].some((n) => n >= 2)) {
+    for (const name of dupCounter.keys()) {
       response.cookies.set(name, "", {
         path: "/",
         domain: ".kitstartai.com",
         maxAge: 0,
-      })
-    );
+      });
+    }
   }
 
   const isApi = pathname.startsWith("/api/");
