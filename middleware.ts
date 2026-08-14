@@ -79,6 +79,34 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Legacy-дубли кук: в коротком окне деплоя сессия писалась ещё и с
+  // Domain=.kitstartai.com, в браузерах накопились две генерации sb-auth-token
+  // (host-only + domain). Вместе они раздувают Cookie-заголовок за лимит
+  // Cloudflare (~8KB) → 400 Request Header Or Cookie Too Large (Safari).
+  // Если в запросе >1 куки сессии — убиваем только Domain-варианты
+  // (максимум 6 чанков), host-only генерация не трогается.
+  const authCookieNames = [
+    ...new Set(
+      request.cookies
+        .getAll()
+        .filter(
+          (c) =>
+            c.name === "sb-auth-token" ||
+            c.name.startsWith("sb-auth-token.")
+        )
+        .map((c) => c.name)
+    ),
+  ];
+  if (authCookieNames.length >= 2) {
+    authCookieNames.forEach((name) =>
+      response.cookies.set(name, "", {
+        path: "/",
+        domain: ".kitstartai.com",
+        maxAge: 0,
+      })
+    );
+  }
+
   const isApi = pathname.startsWith("/api/");
   const isProtectedApi =
     isApi &&
